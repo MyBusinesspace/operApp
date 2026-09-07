@@ -1,0 +1,180 @@
+{
+  "name": "Asset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Asset name or model"
+    },
+    "serial_number": {
+      "type": "string",
+      "description": "Serial / chassis number"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal reference code"
+    },
+    "category": {
+      "type": "string",
+      "description": "Asset category \u2014 managed via Asset Settings (AssetCategory records)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Available",
+        "In Use",
+        "Under Maintenance",
+        "Retired"
+      ],
+      "default": "Available",
+      "description": "Current operational status"
+    },
+    "accounting_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "registered",
+        "sold_disposed"
+      ],
+      "default": "draft",
+      "description": "Fixed asset accounting lifecycle status"
+    },
+    "group_id": {
+      "type": "string",
+      "description": "Reference to AssetGroup"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Linked contact (owner / customer)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order (legacy single \u2014 use work_order_ids for multiple)"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order title (legacy single \u2014 use work_order_names for multiple)"
+    },
+    "work_order_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of linked work order IDs"
+    },
+    "work_order_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached linked work order titles"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of purchase"
+    },
+    "purchase_price": {
+      "type": "number",
+      "description": "Purchase price (cost)"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code"
+    },
+    "location": {
+      "type": "string",
+      "description": "Current location / site"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "Manufacturer / brand"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model number"
+    },
+    "year": {
+      "type": "number",
+      "description": "Year of manufacture"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    },
+    "custom_fields": {
+      "type": "object",
+      "description": "User-defined custom field values keyed by AssetField id (configured in Asset Settings)",
+      "default": {}
+    },
+    "depreciation_method": {
+      "type": "string",
+      "enum": [
+        "straight_line",
+        "diminishing_value"
+      ],
+      "default": "straight_line",
+      "description": "Depreciation calculation method"
+    },
+    "useful_life_years": {
+      "type": "number",
+      "description": "Expected useful life in years"
+    },
+    "residual_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Salvage / residual value at end of life"
+    },
+    "depreciation_rate": {
+      "type": "number",
+      "description": "Annual depreciation rate % (used for diminishing value)"
+    },
+    "depreciation_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date depreciation starts (defaults to purchase_date)"
+    },
+    "accumulated_depreciation": {
+      "type": "number",
+      "default": 0,
+      "description": "Total depreciation posted to date"
+    },
+    "last_depreciation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last depreciation run date"
+    },
+    "depreciation_account_id": {
+      "type": "string",
+      "description": "COA account for Depreciation Expense"
+    },
+    "depreciation_account_name": {
+      "type": "string",
+      "description": "Cached COA account name"
+    },
+    "accumulated_account_id": {
+      "type": "string",
+      "description": "COA account for Accumulated Depreciation"
+    },
+    "accumulated_account_name": {
+      "type": "string",
+      "description": "Cached accumulated depreciation account name"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

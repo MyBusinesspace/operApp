@@ -1,0 +1,212 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Invoice number e.g. INV-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal or customer reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title shown on the invoice"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary / description shown below the title on the invoice"
+    },
+    "quote_id": {
+      "type": "string",
+      "description": "Linked quote ID (if converted from quote)"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (customer)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached customer name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Awaiting Approval",
+        "Awaiting Payment",
+        "Paid",
+        "Repeating",
+        "Cancelled"
+      ],
+      "default": "Draft"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "incoterm": {
+      "type": "string",
+      "description": "Incoterm code applied to this invoice (e.g. EXW, DAP, CIF)"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount paid against this invoice"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked task IDs"
+    },
+    "task_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task titles"
+    },
+    "task_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task reference codes (stable identifiers, e.g. TSK-2026-0286)"
+    },
+    "payments": {
+      "type": "array",
+      "description": "Payment records against this invoice",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "bank_account_id": {
+            "type": "string"
+          },
+          "bank_account_name": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "bank_transaction_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "string"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex photos attached to the invoice",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded photo URL"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Photo caption / description"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ]
+}

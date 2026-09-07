@@ -1,0 +1,28 @@
+{
+  "name": "TaskShift",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Shift name (e.g. Morning, Afternoon)"
+    },
+    "time_in": {
+      "type": "string",
+      "description": "Start time HH:MM"
+    },
+    "time_out": {
+      "type": "string",
+      "description": "End time HH:MM"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#6366f1"
+    }
+  },
+  "required": [
+    "name",
+    "time_in",
+    "time_out"
+  ]
+}

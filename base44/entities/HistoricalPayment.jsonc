@@ -1,0 +1,46 @@
+{
+  "name": "HistoricalPayment",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "payment_type": {
+      "type": "string",
+      "enum": [
+        "gratuity",
+        "leave_bonus"
+      ],
+      "description": "Whether this is an annual gratuity or annual leave bonus payment"
+    },
+    "year": {
+      "type": "number",
+      "description": "Calendar year the payment corresponds to (prevents double-counting)"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount paid (AED)"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Approximate date the payment was made"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about this historical payment"
+    }
+  },
+  "required": [
+    "employee_id",
+    "payment_type",
+    "year",
+    "amount"
+  ]
+}

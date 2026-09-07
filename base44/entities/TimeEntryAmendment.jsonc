@@ -1,0 +1,64 @@
+{
+  "name": "TimeEntryAmendment",
+  "type": "object",
+  "properties": {
+    "time_entry_id": {
+      "type": "string",
+      "description": "Reference to the TimeEntry being amended"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Reference to Task"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Cached task title"
+    },
+    "original_clock_in": {
+      "type": "string",
+      "description": "Original clock-in datetime (ISO)"
+    },
+    "original_clock_out": {
+      "type": "string",
+      "description": "Original clock-out datetime (ISO)"
+    },
+    "amended_clock_in": {
+      "type": "string",
+      "description": "Requested new clock-in datetime (ISO)"
+    },
+    "amended_clock_out": {
+      "type": "string",
+      "description": "Requested new clock-out datetime (ISO)"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Employee reason for the amendment"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Approved",
+        "Rejected"
+      ],
+      "default": "Pending",
+      "description": "Approval status"
+    },
+    "manager_notes": {
+      "type": "string",
+      "description": "Manager notes on the amendment decision"
+    }
+  },
+  "required": [
+    "time_entry_id",
+    "employee_id"
+  ]
+}

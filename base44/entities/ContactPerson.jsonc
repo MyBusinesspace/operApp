@@ -1,0 +1,58 @@
+{
+  "name": "ContactPerson",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (Company) \u2014 optional, set when company is known"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached company name"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Reference to Project \u2014 optional, set when created from project or work order context"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder \u2014 optional, set when created from work order context"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order title"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full name of the contact person"
+    },
+    "role": {
+      "type": "string",
+      "description": "Role or position (e.g. CEO, Procurement Manager, Site Engineer)"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is this the primary contact person"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "full_name"
+  ]
+}

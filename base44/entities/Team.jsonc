@@ -1,0 +1,49 @@
+{
+  "name": "Team",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Team name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Team description"
+    },
+    "leader_id": {
+      "type": "string",
+      "description": "Employee ID of the team leader"
+    },
+    "leader_name": {
+      "type": "string",
+      "description": "Cached team leader name"
+    },
+    "employee_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of employee IDs in this team"
+    },
+    "employee_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached employee names"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Manual sort position \u2014 lower numbers appear first"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

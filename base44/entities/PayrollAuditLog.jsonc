@@ -1,0 +1,75 @@
+{
+  "name": "PayrollAuditLog",
+  "type": "object",
+  "properties": {
+    "pay_period_id": {
+      "type": "string",
+      "description": "Reference to PayPeriod"
+    },
+    "pay_period_name": {
+      "type": "string",
+      "description": "Cached pay period name"
+    },
+    "payroll_entry_id": {
+      "type": "string",
+      "description": "Reference to PayrollEntry (null for period-level actions)"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Employee affected (null for period-level actions)"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "period_created",
+        "entries_generated",
+        "entry_recalculated",
+        "entry_reviewed",
+        "entry_approved",
+        "period_approved",
+        "period_paid",
+        "entry_voided",
+        "period_cancelled",
+        "bonus_added",
+        "deduction_added"
+      ],
+      "description": "Type of action performed"
+    },
+    "performed_by": {
+      "type": "string",
+      "description": "User ID who performed the action"
+    },
+    "performed_by_name": {
+      "type": "string",
+      "description": "Cached user name"
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO datetime of the action"
+    },
+    "changes_summary": {
+      "type": "string",
+      "description": "Human-readable description of what changed"
+    },
+    "previous_values": {
+      "type": "object",
+      "description": "Snapshot of key values before the change",
+      "additionalProperties": true
+    },
+    "new_values": {
+      "type": "object",
+      "description": "Snapshot of key values after the change",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "pay_period_id",
+    "action",
+    "performed_by",
+    "timestamp"
+  ]
+}

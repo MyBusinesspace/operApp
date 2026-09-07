@@ -1,0 +1,73 @@
+{
+  "name": "BankAccount",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Account name e.g. Main Current Account"
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "Bank institution name"
+    },
+    "account_number": {
+      "type": "string",
+      "description": "Bank account number (last 4 digits or masked)"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "Bank",
+        "Credit Card",
+        "Current",
+        "Savings",
+        "Loan",
+        "Petty Cash"
+      ],
+      "default": "Bank",
+      "description": "Account type \u2014 Bank or Credit Card"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "chart_account_id": {
+      "type": "string",
+      "description": "Linked Chart of Account (enable_payments=true)"
+    },
+    "chart_account_code": {
+      "type": "string"
+    },
+    "chart_account_name": {
+      "type": "string"
+    },
+    "opening_balance": {
+      "type": "number",
+      "default": 0
+    },
+    "opening_balance_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived"
+      ],
+      "default": "Active"
+    },
+    "show_on_dashboard": {
+      "type": "boolean",
+      "default": true
+    },
+    "color": {
+      "type": "string",
+      "default": "#6366f1"
+    }
+  },
+  "required": [
+    "name",
+    "currency"
+  ]
+}

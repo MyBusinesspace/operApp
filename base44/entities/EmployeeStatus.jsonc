@@ -1,0 +1,22 @@
+{
+  "name": "EmployeeStatus",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Status name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#22c55e"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

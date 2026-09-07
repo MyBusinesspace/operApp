@@ -1,0 +1,106 @@
+{
+  "name": "LeaveRequest",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "submitted_by_name": {
+      "type": "string",
+      "description": "Cached name of the user who submitted the request (the submitter)"
+    },
+    "leave_type": {
+      "type": "string",
+      "enum": [
+        "vacation",
+        "sick",
+        "other",
+        "unjustified"
+      ],
+      "default": "vacation",
+      "description": "Type of leave. vacation/sick/other = justified (paid). unjustified = absence without justification (unpaid, deducted when approved)."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "First day of leave"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last day of leave"
+    },
+    "total_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Total calendar days requested"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Employee's reason for the leave request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Approval status. rejected = request declined (no payroll effect). Only approved leaves affect payroll."
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "User ID who approved/rejected"
+    },
+    "approved_by_name": {
+      "type": "string",
+      "description": "Cached approver name"
+    },
+    "approved_at": {
+      "type": "string",
+      "description": "ISO timestamp of approval/rejection"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notes from the approving manager"
+    },
+    "documents": {
+      "type": "array",
+      "description": "Attached supporting documents",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title / label"
+          },
+          "file_url": {
+            "type": "string",
+            "description": "Uploaded file URL"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Original file name"
+          },
+          "file_type": {
+            "type": "string",
+            "description": "MIME type"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "employee_id",
+    "leave_type",
+    "start_date",
+    "end_date"
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "name": "PayrollSettings",
+  "type": "object",
+  "properties": {
+    "pay_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "biweekly",
+        "weekly"
+      ],
+      "default": "monthly",
+      "description": "How often payroll is run"
+    },
+    "pay_day": {
+      "type": "number",
+      "default": 25,
+      "description": "Day of month on which employees are paid (for monthly frequency)"
+    },
+    "shift_end_time": {
+      "type": "string",
+      "description": "Official shift end time (HH:MM). Minutes worked after this time count as overtime.",
+      "default": "17:00"
+    },
+    "overtime_threshold_daily_h": {
+      "type": "number",
+      "default": 8,
+      "description": "Daily hours before overtime rate kicks in (alternative to shift_end_time)"
+    },
+    "overtime_use_clock_time": {
+      "type": "boolean",
+      "default": true,
+      "description": "If true, overtime is calculated based on shift_end_time. If false, based on daily hours threshold."
+    },
+    "overtime_threshold_weekly_h": {
+      "type": "number",
+      "default": 40,
+      "description": "Weekly hours before overtime rate kicks in"
+    },
+    "overtime_multiplier": {
+      "type": "number",
+      "default": 1.5,
+      "description": "Multiplier applied to basic hourly rate for regular overtime"
+    },
+    "overtime_multiplier_sunday": {
+      "type": "number",
+      "default": 2.0,
+      "description": "Multiplier for overtime worked on Sundays"
+    },
+    "overtime_multiplier_holiday": {
+      "type": "number",
+      "default": 2.0,
+      "description": "Multiplier for overtime worked on public holidays"
+    },
+    "overtime_fixed_rate": {
+      "type": "number",
+      "description": "Optional fixed AED rate per OT hour (overrides multiplier-based calculation)"
+    },
+    "overtime_fixed_rate_sunday": {
+      "type": "number",
+      "description": "Optional fixed AED rate per OT hour on Sundays"
+    },
+    "overtime_fixed_rate_holiday": {
+      "type": "number",
+      "description": "Optional fixed AED rate per OT hour on public holidays"
+    },
+    "public_holidays": {
+      "type": "array",
+      "description": "List of public holiday dates (YYYY-MM-DD) for overtime calculations",
+      "items": {
+        "type": "string",
+        "format": "date"
+      }
+    },
+    "working_days_per_month": {
+      "type": "number",
+      "default": 22,
+      "description": "Standard working days per month used to compute daily/hourly rate from basic salary"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Default payroll currency"
+    },
+    "working_days_per_week": {
+      "type": "number",
+      "default": 5,
+      "description": "Standard working days per week"
+    },
+    "working_hours_per_day": {
+      "type": "number",
+      "default": 8,
+      "description": "Standard working hours per day"
+    },
+    "default_annual_leave_days": {
+      "type": "number",
+      "default": 30,
+      "description": "Default annual paid leave entitlement in calendar days for new employees"
+    },
+    "late_deduction_per_minute": {
+      "type": "number",
+      "default": 0,
+      "description": "AED deducted per minute of lateness (0 = disabled)"
+    },
+    "gratuity_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable annual gratuity payment in the vacation month"
+    },
+    "gratuity_years_threshold": {
+      "type": "number",
+      "default": 1,
+      "description": "Minimum years of service to qualify for annual gratuity"
+    },
+    "gratuity_days_per_year": {
+      "type": "number",
+      "default": 21,
+      "description": "Number of days of basic salary paid as gratuity per year of service (general international formula; 21 is a common standard). Annual gratuity = (basic_salary / 30) \u00d7 this value."
+    },
+    "annual_leave_bonus_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Pay one month of basic salary as an annual leave bonus in the month the employee takes approved vacation"
+    },
+    "social_insurance_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "social_insurance_employee_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "social_insurance_employer_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "default_tax_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "wps_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "company_registration_number": {
+      "type": "string"
+    }
+  },
+  "required": []
+}

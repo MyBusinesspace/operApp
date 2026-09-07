@@ -1,0 +1,76 @@
+{
+  "name": "EmployeeLoan",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "loan_type": {
+      "type": "string",
+      "enum": [
+        "salary_advance",
+        "personal_loan",
+        "emergency_loan",
+        "other"
+      ],
+      "default": "salary_advance",
+      "description": "Type of loan or advance"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Total loan amount issued"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for the loan / advance"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the loan was issued"
+    },
+    "monthly_deduction": {
+      "type": "number",
+      "default": 0,
+      "description": "Fixed amount to deduct from salary each pay period"
+    },
+    "remaining_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Outstanding balance to be repaid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paid_off",
+        "cancelled"
+      ],
+      "default": "active",
+      "description": "Current repayment status"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "User ID who approved the loan"
+    },
+    "approved_by_name": {
+      "type": "string",
+      "description": "Cached approver name"
+    }
+  },
+  "required": [
+    "employee_id",
+    "amount",
+    "issue_date"
+  ]
+}

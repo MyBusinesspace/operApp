@@ -1,0 +1,34 @@
+{
+  "name": "ContactNote",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note content"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "Note",
+        "Call",
+        "Email",
+        "Meeting",
+        "Update"
+      ],
+      "default": "Note",
+      "description": "Type of activity"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who added the note"
+    }
+  },
+  "required": [
+    "contact_id",
+    "note"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "name": "WorkerLocation",
+  "type": "object",
+  "properties": {
+    "time_entry_id": {
+      "type": "string",
+      "description": "Reference to the active TimeEntry"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Reference to Task"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Cached task title"
+    },
+    "lat": {
+      "type": "number",
+      "description": "Latitude"
+    },
+    "lng": {
+      "type": "number",
+      "description": "Longitude"
+    },
+    "address": {
+      "type": "string",
+      "description": "Reverse-geocoded address"
+    },
+    "recorded_at": {
+      "type": "string",
+      "description": "ISO timestamp when location was recorded"
+    }
+  },
+  "required": [
+    "time_entry_id",
+    "employee_id",
+    "lat",
+    "lng",
+    "recorded_at"
+  ]
+}

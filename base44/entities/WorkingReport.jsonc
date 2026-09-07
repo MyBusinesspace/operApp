@@ -1,0 +1,130 @@
+{
+  "name": "WorkingReport",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated reference e.g. TSK-2026-0001-1, TSK-2026-0001-2"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Reference to Task"
+    },
+    "task_reference": {
+      "type": "string",
+      "description": "Cached task reference"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Cached task title"
+    },
+    "time_entry_id": {
+      "type": "string",
+      "description": "Reference to the TimeEntry this report was generated from"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Reference to Project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "clock_in_time": {
+      "type": "string",
+      "description": "Inherited from TimeEntry"
+    },
+    "clock_out_time": {
+      "type": "string",
+      "description": "Inherited from TimeEntry"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Inherited from TimeEntry"
+    },
+    "report_site_items": {
+      "type": "array",
+      "description": "Site report checklist items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "report_work_description": {
+      "type": "string",
+      "description": "Employee work description \u2014 describe the work performed"
+    },
+    "report_balance_work": {
+      "type": "string",
+      "description": "Remaining / balance work still pending"
+    },
+    "report_client_comments": {
+      "type": "string",
+      "description": "Client comments / feedback"
+    },
+    "report_client_signature": {
+      "type": "string",
+      "description": "Base64 PNG of client signature"
+    },
+    "on_site": {
+      "type": "boolean",
+      "description": "Whether employee was on-site at clock-in"
+    },
+    "clock_in_address": {
+      "type": "string",
+      "description": "Clock-in address"
+    },
+    "clock_out_address": {
+      "type": "string",
+      "description": "Clock-out address"
+    },
+    "is_acting_leader": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this employee was auto-designated as acting leader for the report (only person on task, or no team leader assigned to this task)"
+    },
+    "report_leader_name": {
+      "type": "string",
+      "description": "Name of the leader (team leader or acting leader) who authored this report"
+    },
+    "designated_leader_name": {
+      "type": "string",
+      "description": "Name of the designated team leader of the task (the accountable leader), independent of who authored/filled this report"
+    }
+  },
+  "required": [
+    "task_id",
+    "time_entry_id"
+  ]
+}

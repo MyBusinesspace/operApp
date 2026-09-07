@@ -1,0 +1,56 @@
+{
+  "name": "TimeAggregation",
+  "type": "object",
+  "properties": {
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "employee",
+        "task",
+        "work_order",
+        "project",
+        "contact",
+        "asset"
+      ],
+      "description": "Type of entity being aggregated"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the entity"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Cached entity name"
+    },
+    "period": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "alltime"
+      ],
+      "description": "Aggregation period"
+    },
+    "period_key": {
+      "type": "string",
+      "description": "Period key e.g. 2026-06-04 / 2026-W23 / 2026-06 / all"
+    },
+    "total_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total minutes logged"
+    },
+    "entry_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of time entries"
+    }
+  },
+  "required": [
+    "entity_type",
+    "entity_id",
+    "period",
+    "period_key"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "name": "EmployeeDocument",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "document_type_id": {
+      "type": "string",
+      "description": "Reference to EmployeeDocumentType"
+    },
+    "document_type_name": {
+      "type": "string",
+      "description": "Cached document type name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original filename"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Document expiry date (if applicable)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes"
+    },
+    "document_number": {
+      "type": "string",
+      "description": "Document number / ID extracted via AI or entered manually"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full name as shown on the document (AI-extracted)"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of birth on the document (AI-extracted)"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Issue date of the document (AI-extracted)"
+    },
+    "issuing_authority": {
+      "type": "string",
+      "description": "Authority or country that issued the document (AI-extracted)"
+    },
+    "nationality": {
+      "type": "string",
+      "description": "Nationality shown on the document (AI-extracted)"
+    },
+    "extra_fields": {
+      "type": "object",
+      "description": "Any additional key/value data extracted from the document that does not map to a dedicated field",
+      "properties": {},
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "employee_id",
+    "document_type_id"
+  ]
+}

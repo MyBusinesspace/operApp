@@ -1,0 +1,75 @@
+{
+  "name": "SalaryAuditLog",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "profile_id": {
+      "type": "string",
+      "description": "Reference to EmployeePayrollProfile"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "salary_updated",
+        "hourly_rate_updated",
+        "profile_created",
+        "profile_updated"
+      ],
+      "description": "Type of change"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "individual_edit",
+        "bulk_edit"
+      ],
+      "default": "individual_edit",
+      "description": "How the change was made"
+    },
+    "field_changed": {
+      "type": "string",
+      "description": "Which field was changed e.g. basic_salary"
+    },
+    "old_value": {
+      "type": "number",
+      "description": "Previous value"
+    },
+    "new_value": {
+      "type": "number",
+      "description": "New value"
+    },
+    "change_amount": {
+      "type": "number",
+      "description": "Difference (new - old)"
+    },
+    "performed_by_id": {
+      "type": "string",
+      "description": "User ID who made the change"
+    },
+    "performed_by_name": {
+      "type": "string",
+      "description": "Cached user full name"
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO datetime of the change"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional context or reason"
+    }
+  },
+  "required": [
+    "employee_id",
+    "action",
+    "performed_by_id",
+    "timestamp"
+  ]
+}

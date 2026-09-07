@@ -1,0 +1,83 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Product/service code (required)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Product/service name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Product",
+        "Service"
+      ],
+      "default": "Service",
+      "description": "Item type"
+    },
+    "track_inventory": {
+      "type": "boolean",
+      "default": false,
+      "description": "Track inventory quantity"
+    },
+    "is_purchased": {
+      "type": "boolean",
+      "default": true,
+      "description": "Used in purchase transactions"
+    },
+    "cost_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Purchase / cost price"
+    },
+    "purchase_tax_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Purchase tax rate %"
+    },
+    "purchase_description": {
+      "type": "string",
+      "description": "Description for purchase documents"
+    },
+    "is_sold": {
+      "type": "boolean",
+      "default": true,
+      "description": "Used in sales transactions"
+    },
+    "sale_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Sale / selling price"
+    },
+    "sale_tax_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Sales tax rate %"
+    },
+    "sale_description": {
+      "type": "string",
+      "description": "Description for sales documents (quotes, invoices)"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Stock quantity on hand"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure (e.g. pcs, hrs, kg)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ]
+}

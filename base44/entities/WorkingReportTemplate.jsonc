@@ -1,0 +1,159 @@
+{
+  "name": "WorkingReportTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "max_reports_per_task": {
+      "type": "number",
+      "default": 99,
+      "description": "Maximum number of working reports per task. 0 = no reports, 1 = one report max, 99 = unlimited"
+    },
+    "ref_prefix": {
+      "type": "string",
+      "default": "WR",
+      "description": "Reference prefix for working report numbers e.g. WR"
+    },
+    "ref_include_year": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include year in reference number e.g. WR-2026-0001"
+    },
+    "ref_number_padding": {
+      "type": "number",
+      "default": 4,
+      "description": "Zero-padding for the sequential number"
+    },
+    "ref_next_number": {
+      "type": "number",
+      "default": 1,
+      "description": "Next sequential number to use"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#cc0000",
+      "description": "Brand accent color (hex)"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo URL"
+    },
+    "show_logo": {
+      "type": "boolean",
+      "default": true
+    },
+    "stamp_url": {
+      "type": "string",
+      "description": "Company stamp / seal image URL"
+    },
+    "show_stamp": {
+      "type": "boolean",
+      "default": false
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name shown on report"
+    },
+    "company_name_font_size": {
+      "type": "number",
+      "default": 22,
+      "description": "Font size (pt) of the company name in the report header \u2014 applies to preview and PDF"
+    },
+    "company_address": {
+      "type": "string"
+    },
+    "company_phone": {
+      "type": "string"
+    },
+    "company_email": {
+      "type": "string"
+    },
+    "company_website": {
+      "type": "string"
+    },
+    "tax_id": {
+      "type": "string",
+      "description": "TRN / VAT number"
+    },
+    "show_tax_number": {
+      "type": "boolean",
+      "default": true
+    },
+    "report_title": {
+      "type": "string",
+      "default": "SERVICE & MAINTENANCE REPORT",
+      "description": "Title printed at top of report"
+    },
+    "footer_notes": {
+      "type": "string",
+      "description": "Footer text"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false
+    },
+    "layout": {
+      "type": "object",
+      "description": "Declarative report layout: ordered sections, rows, and variable bindings rendered identically by web and mobile. Seeded with DEFAULT_LAYOUT when absent. Variables (bind fields) are substituted with entry/task/asset/template data at render time.",
+      "default": {}
+    },
+    "schedule_orientation": {
+      "type": "string",
+      "enum": [
+        "portrait",
+        "landscape"
+      ],
+      "default": "portrait",
+      "description": "Default PDF orientation for daily schedule"
+    },
+    "schedule_paper_size": {
+      "type": "string",
+      "enum": [
+        "a4",
+        "letter"
+      ],
+      "default": "a4",
+      "description": "Default paper size for daily schedule"
+    },
+    "schedule_font_size": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "default": "medium",
+      "description": "Default font size for daily schedule PDF"
+    },
+    "schedule_show_stats": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show stats bar in daily schedule PDF"
+    },
+    "schedule_show_assigned": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show workers column in daily schedule PDF"
+    },
+    "schedule_show_location": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show location column in daily schedule PDF"
+    },
+    "schedule_show_equipment": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show equipment column in daily schedule PDF"
+    },
+    "schedule_show_switch_task": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show switch task rows in daily schedule PDF"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

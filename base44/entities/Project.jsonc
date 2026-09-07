@@ -1,0 +1,113 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal project reference / code"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Rental",
+        "Installation",
+        "Maintenance",
+        "Consulting",
+        "Construction",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "Project type"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Active",
+        "On Hold",
+        "Completed",
+        "Cancelled"
+      ],
+      "default": "Active",
+      "description": "Current project status"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (customer)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact / customer name"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact / client phone number"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Contact / client email address"
+    },
+    "contact_person": {
+      "type": "string",
+      "description": "Name of the contact person / project manager on client side"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Project start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected or actual end date"
+    },
+    "budget": {
+      "type": "number",
+      "description": "Project budget"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Currency code"
+    },
+    "location": {
+      "type": "string",
+      "description": "Site or location name/address"
+    },
+    "location_name": {
+      "type": "string",
+      "description": "Short display name for the site/location"
+    },
+    "maps_link": {
+      "type": "string",
+      "description": "Google Maps URL for the project location"
+    },
+    "location_lat": {
+      "type": "number",
+      "description": "Latitude extracted from Google Maps link"
+    },
+    "location_lng": {
+      "type": "number",
+      "description": "Longitude extracted from Google Maps link"
+    },
+    "description": {
+      "type": "string",
+      "description": "Project description"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Comma-separated tags"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

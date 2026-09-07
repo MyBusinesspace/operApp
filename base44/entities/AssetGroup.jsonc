@@ -1,0 +1,64 @@
+{
+  "name": "AssetGroup",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Asset type / group name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color for the group label",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Group description"
+    },
+    "asset_account_id": {
+      "type": "string",
+      "description": "COA \u2014 Asset account"
+    },
+    "asset_account_name": {
+      "type": "string",
+      "description": "Cached asset account name"
+    },
+    "accumulated_account_id": {
+      "type": "string",
+      "description": "COA \u2014 Accumulated depreciation account"
+    },
+    "accumulated_account_name": {
+      "type": "string",
+      "description": "Cached accumulated depreciation account name"
+    },
+    "depreciation_account_id": {
+      "type": "string",
+      "description": "COA \u2014 Depreciation expense account"
+    },
+    "depreciation_account_name": {
+      "type": "string",
+      "description": "Cached depreciation expense account name"
+    },
+    "depreciation_method": {
+      "type": "string",
+      "enum": [
+        "straight_line",
+        "diminishing_value"
+      ],
+      "default": "straight_line",
+      "description": "Default depreciation method for assets in this group"
+    },
+    "useful_life_years": {
+      "type": "number",
+      "description": "Default useful life in years"
+    },
+    "residual_value_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Default residual value as % of cost"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

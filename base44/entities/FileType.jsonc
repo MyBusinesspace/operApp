@@ -1,0 +1,38 @@
+{
+  "name": "FileType",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "File type name e.g. Trade License, Third Party Certificate, Manual"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color for the badge",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    },
+    "reference_prefix": {
+      "type": "string",
+      "description": "Reference prefix for files of this type e.g. TL, CON, CERT",
+      "default": ""
+    },
+    "entity_scope": {
+      "type": "string",
+      "enum": [
+        "Contact",
+        "Project",
+        "Asset",
+        "WorkOrder",
+        "Organization"
+      ],
+      "description": "Optional scope \u2014 kept for backward compatibility. File types are global and available across all modules regardless of this value."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

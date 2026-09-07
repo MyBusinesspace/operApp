@@ -1,0 +1,210 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated task reference code e.g. TSK-2026-0001"
+    },
+    "title": {
+      "type": "string",
+      "description": "Task title (supports placeholders: [Month], [Week], [Year], [MonthYear], [WeekYear])"
+    },
+    "description": {
+      "type": "string",
+      "description": "Task description"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Template",
+        "Queued",
+        "Scheduled",
+        "Not Completed",
+        "Completed",
+        "Archived"
+      ],
+      "default": "Queued",
+      "description": "Task status \u2014 Template is a reusable skeleton that can be cloned into new Draft tasks (excluded from the operation cycle). Archived is a terminal state set automatically when the parent project is completed."
+    },
+    "category": {
+      "type": "string",
+      "description": "Task category"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order ID"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order title"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project ID"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Linked contact ID"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked asset ID"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Cached asset name"
+    },
+    "assigned_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of assigned user IDs"
+    },
+    "assigned_user_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of assigned user display names"
+    },
+    "assigned_employees": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of assigned employee IDs"
+    },
+    "assigned_employee_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached assigned employee names"
+    },
+    "assigned_team_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of assigned team IDs"
+    },
+    "assigned_team_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached assigned team names"
+    },
+    "planning_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Planned execution date"
+    },
+    "planning_time_in": {
+      "type": "string",
+      "description": "Planned start time (HH:MM)"
+    },
+    "planning_time_out": {
+      "type": "string",
+      "description": "Planned end time (HH:MM)"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Urgent"
+      ],
+      "default": "Medium",
+      "description": "Task priority"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    },
+    "photos": {
+      "type": "array",
+      "description": "Technical reference photos",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "location_lat": {
+      "type": "number",
+      "description": "Expected task site latitude"
+    },
+    "location_lng": {
+      "type": "number",
+      "description": "Expected task site longitude"
+    },
+    "location_address": {
+      "type": "string",
+      "description": "Expected task site address"
+    },
+    "allowed_radius_m": {
+      "type": "number",
+      "default": 200,
+      "description": "Geofence radius in meters"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this task is a recurring template"
+    },
+    "recurrence_frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly"
+      ],
+      "description": "How often the task recurs"
+    },
+    "recurrence_day_of_month": {
+      "type": "number",
+      "description": "Day of month to schedule the task (1\u201331). Used with monthly/quarterly frequency."
+    },
+    "recurrence_day_of_week": {
+      "type": "number",
+      "description": "Day of week to schedule the task (0=Sunday, 1=Monday, ... 6=Saturday). Used with weekly frequency."
+    },
+    "recurrence_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Stop generating new instances after this date"
+    },
+    "last_generated_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when last recurring instance was generated"
+    },
+    "recurrence_template_id": {
+      "type": "string",
+      "description": "If this is a generated copy, points to the recurring template task ID"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

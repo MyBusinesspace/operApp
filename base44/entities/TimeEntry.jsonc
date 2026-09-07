@@ -1,0 +1,133 @@
+{
+  "name": "TimeEntry",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Reference to Task"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Cached task title"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder (inherited from task)"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Reference to Project (inherited from task)"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (inherited from task)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Reference to Asset (inherited from task)"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Cached asset name"
+    },
+    "clock_in_time": {
+      "type": "string",
+      "description": "ISO datetime of clock in"
+    },
+    "clock_out_time": {
+      "type": "string",
+      "description": "ISO datetime of clock out"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Total duration in minutes"
+    },
+    "overtime_override_minutes": {
+      "type": "number",
+      "description": "Manager override for overtime minutes. When set (not null), the Overtime Report uses this value instead of the computed overtime. Set to 0 to force zero overtime."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Completed",
+        "Switched"
+      ],
+      "default": "Active",
+      "description": "Entry status"
+    },
+    "clock_in_lat": {
+      "type": "number",
+      "description": "Clock-in latitude"
+    },
+    "clock_in_lng": {
+      "type": "number",
+      "description": "Clock-in longitude"
+    },
+    "clock_in_address": {
+      "type": "string",
+      "description": "Clock-in resolved address"
+    },
+    "clock_in_photo_url": {
+      "type": "string",
+      "description": "Photo taken at clock-in"
+    },
+    "clock_out_lat": {
+      "type": "number",
+      "description": "Clock-out latitude"
+    },
+    "clock_out_lng": {
+      "type": "number",
+      "description": "Clock-out longitude"
+    },
+    "clock_out_address": {
+      "type": "string",
+      "description": "Clock-out resolved address"
+    },
+    "clock_out_photo_url": {
+      "type": "string",
+      "description": "Photo taken at clock-out"
+    },
+    "distance_from_task_m": {
+      "type": "number",
+      "description": "Distance in meters from task location at clock-in"
+    },
+    "on_site": {
+      "type": "boolean",
+      "description": "Whether employee was within allowed radius at clock-in"
+    },
+    "switched_from_entry_id": {
+      "type": "string",
+      "description": "Previous TimeEntry ID if this was a task switch"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes"
+    }
+  },
+  "required": [
+    "employee_id",
+    "task_id",
+    "clock_in_time"
+  ]
+}

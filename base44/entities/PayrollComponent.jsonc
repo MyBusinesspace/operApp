@@ -1,0 +1,75 @@
+{
+  "name": "PayrollComponent",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Component name e.g. Housing Allowance, Transport Allowance"
+    },
+    "code": {
+      "type": "string",
+      "description": "Short code e.g. HRA, TA, BONUS"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "earning",
+        "deduction",
+        "tax",
+        "benefit"
+      ],
+      "default": "earning",
+      "description": "Whether this adds to or reduces net pay"
+    },
+    "calculation_method": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "percentage_of_basic",
+        "percentage_of_gross"
+      ],
+      "default": "fixed",
+      "description": "How the component value is computed"
+    },
+    "default_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Default amount (AED) or percentage depending on calculation_method"
+    },
+    "is_taxable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this component is included in taxable income"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically included every pay period"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this component is available for assignment"
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "System components are seeded by default and cannot be edited or deleted"
+    },
+    "applies_to_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional role filter \u2014 leave empty to apply to all roles"
+    },
+    "description": {
+      "type": "string",
+      "description": "Internal notes about this component"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

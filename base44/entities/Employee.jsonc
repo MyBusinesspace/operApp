@@ -1,0 +1,102 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Full name of the employee"
+    },
+    "employee_no": {
+      "type": "string",
+      "description": "Employee number / WPS worker ID (shown on payroll and profile)"
+    },
+    "bank_account": {
+      "type": "string",
+      "description": "IBAN / bank account number for salary transfers"
+    },
+    "email": {
+      "type": "string",
+      "description": "Work email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "role": {
+      "type": "string",
+      "description": "Employee role \u2014 references EmployeeRole.name"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department the employee belongs to"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "On Leave",
+        "Inactive",
+        "Terminated"
+      ],
+      "default": "Active",
+      "description": "Current employment status"
+    },
+    "hire_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of hire"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "team_id": {
+      "type": "string",
+      "description": "Reference to Team"
+    },
+    "team_name": {
+      "type": "string",
+      "description": "Cached team name"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked app User ID (Base44 user)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Cached linked user email"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the employee"
+    },
+    "absence_status": {
+      "type": "string",
+      "enum": [
+        "vacation",
+        "sick",
+        "other"
+      ],
+      "description": "Current absence/unavailability status"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Manual sort position in the Planner \u2014 lower numbers appear first"
+    }
+  },
+  "required": [
+    "full_name",
+    "email",
+    "role"
+  ]
+}

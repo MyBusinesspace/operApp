@@ -1,0 +1,119 @@
+{
+  "name": "JournalEntry",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Journal entry number e.g. JNL-0001"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Entry date"
+    },
+    "narration": {
+      "type": "string",
+      "description": "Description / narration"
+    },
+    "reference": {
+      "type": "string",
+      "description": "External reference"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Invoice",
+        "Bill",
+        "PurchaseOrder",
+        "PettyCash",
+        "Payroll"
+      ],
+      "default": "Manual",
+      "description": "Origin of this journal entry"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the originating document"
+    },
+    "source_number": {
+      "type": "string",
+      "description": "Cached document number (e.g. INV-0001)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Posted",
+        "Voided"
+      ],
+      "default": "Draft"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "total_debit": {
+      "type": "number",
+      "default": 0
+    },
+    "total_credit": {
+      "type": "number",
+      "default": 0
+    },
+    "lines": {
+      "type": "array",
+      "description": "Debit/credit lines",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "debit": {
+            "type": "number"
+          },
+          "credit": {
+            "type": "number"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "tax_amount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "posted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the entry was posted"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "date",
+    "narration"
+  ]
+}

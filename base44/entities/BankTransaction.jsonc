@@ -1,0 +1,106 @@
+{
+  "name": "BankTransaction",
+  "type": "object",
+  "properties": {
+    "bank_account_id": {
+      "type": "string",
+      "description": "Reference to BankAccount"
+    },
+    "bank_account_name": {
+      "type": "string",
+      "description": "Cached bank account name"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Transaction date"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description / narration"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Reference number or cheque number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Receive Money",
+        "Spend Money",
+        "Transfer"
+      ],
+      "default": "Spend Money"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Chart of Account to post against"
+    },
+    "account_code": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Unreconciled",
+        "Reconciled"
+      ],
+      "default": "Unreconciled"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Invoice",
+        "Bill",
+        "PettyCash",
+        "Transfer",
+        "Payroll"
+      ],
+      "default": "Manual"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_number": {
+      "type": "string"
+    },
+    "journal_entry_id": {
+      "type": "string",
+      "description": "Linked journal entry if auto-posted"
+    },
+    "transfer_to_account_id": {
+      "type": "string",
+      "description": "For Transfer type: destination bank account"
+    },
+    "transfer_to_account_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "bank_account_id",
+    "date",
+    "amount",
+    "type"
+  ]
+}

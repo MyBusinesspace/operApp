@@ -1,0 +1,22 @@
+{
+  "name": "ContactGroup",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Group name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color for the group label",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Group description"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

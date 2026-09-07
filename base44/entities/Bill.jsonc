@@ -1,0 +1,178 @@
+{
+  "name": "Bill",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Bill number e.g. BILL-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Supplier reference / invoice number"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary shown on the bill"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (supplier)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached supplier name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Awaiting Approval",
+        "Awaiting Payment",
+        "Paid",
+        "Repeating",
+        "Cancelled"
+      ],
+      "default": "Draft"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department this bill is allocated to"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount paid against this bill"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "purchase_order_id": {
+      "type": "string",
+      "description": "Linked Purchase Order"
+    },
+    "purchase_order_number": {
+      "type": "string",
+      "description": "Cached PO number"
+    },
+    "payments": {
+      "type": "array",
+      "description": "Payment records against this bill",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "bank_account_id": {
+            "type": "string"
+          },
+          "bank_account_name": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "bank_transaction_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ]
+}

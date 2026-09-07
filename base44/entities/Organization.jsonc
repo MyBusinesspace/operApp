@@ -1,0 +1,87 @@
+{
+  "name": "Organization",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Organization / company name"
+    },
+    "legal_name": {
+      "type": "string",
+      "description": "Legal / registered company name"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo URL"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry / sector"
+    },
+    "website": {
+      "type": "string",
+      "description": "Company website URL"
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary contact email"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "city": {
+      "type": "string",
+      "description": "City"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country"
+    },
+    "zip": {
+      "type": "string",
+      "description": "Postal / ZIP code"
+    },
+    "tax_id": {
+      "type": "string",
+      "description": "TRN / VAT / Tax ID number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Default currency code"
+    },
+    "fiscal_year_start": {
+      "type": "string",
+      "description": "Fiscal year start month (e.g. January)"
+    },
+    "timezone": {
+      "type": "string",
+      "default": "Asia/Dubai",
+      "description": "Operational timezone (IANA identifier) \u2014 the timezone in which the organization's work is performed. Used for the live clock and date displays across the app."
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "Bank name"
+    },
+    "bank_account": {
+      "type": "string",
+      "description": "Bank account number / IBAN"
+    },
+    "bank_swift": {
+      "type": "string",
+      "description": "SWIFT / BIC code"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

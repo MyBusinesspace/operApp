@@ -1,0 +1,47 @@
+{
+  "name": "WorkOrderFile",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated file reference code e.g. FILE-TL-2026-0001"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded file URL"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type"
+    },
+    "file_type_id": {
+      "type": "string",
+      "description": "Reference to FileType"
+    },
+    "file_type_name": {
+      "type": "string",
+      "description": "Cached file type name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional label"
+    }
+  },
+  "required": [
+    "work_order_id",
+    "file_name",
+    "file_url"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "name": "SharedFile",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated file reference code e.g. FILE-TL-2026-0001"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded file URL"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type"
+    },
+    "file_type_id": {
+      "type": "string",
+      "description": "Reference to FileType"
+    },
+    "file_type_name": {
+      "type": "string",
+      "description": "Cached file type name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description or label"
+    },
+    "post_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the file was posted / received"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (client) \u2014 ascending link"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact / client name"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Reference to Project \u2014 ascending link"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder \u2014 ascending link"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order title"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Reference to Asset"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Cached asset name"
+    }
+  },
+  "required": [
+    "file_name",
+    "file_url"
+  ]
+}

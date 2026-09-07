@@ -1,0 +1,133 @@
+{
+  "name": "PurchaseOrder",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "PO number e.g. PO-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (supplier)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached supplier name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Awaiting Approval",
+        "Approved",
+        "Billed",
+        "Cancelled"
+      ],
+      "default": "Draft"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department this PO is allocated to"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ]
+}

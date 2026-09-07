@@ -1,0 +1,112 @@
+{
+  "name": "WorkOrder",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Work order title"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal reference code"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "On Hold",
+        "Archived"
+      ],
+      "default": "Active",
+      "description": "Work order status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Urgent"
+      ],
+      "default": "Medium",
+      "description": "Priority level"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Maintenance",
+        "Repair",
+        "Inspection",
+        "Installation",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "Work order type"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Linked contact"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked asset"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Cached asset name"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Assigned employee name"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Due date"
+    },
+    "location": {
+      "type": "string",
+      "description": "Work site location \u2014 inherited from project when linked"
+    },
+    "maps_link": {
+      "type": "string",
+      "description": "Google Maps URL \u2014 inherited from project when linked"
+    },
+    "location_lat": {
+      "type": "number",
+      "description": "Latitude \u2014 inherited from project when linked"
+    },
+    "location_lng": {
+      "type": "number",
+      "description": "Longitude \u2014 inherited from project when linked"
+    },
+    "description": {
+      "type": "string",
+      "description": "Work order description"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

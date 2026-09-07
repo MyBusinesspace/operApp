@@ -1,0 +1,33 @@
+{
+  "name": "AssetNote",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "Reference to Asset"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note content"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "Note",
+        "Call",
+        "Email",
+        "Meeting",
+        "Update"
+      ],
+      "default": "Note"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who added the note"
+    }
+  },
+  "required": [
+    "asset_id",
+    "note"
+  ]
+}

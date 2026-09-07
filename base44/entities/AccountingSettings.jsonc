@@ -1,0 +1,59 @@
+{
+  "name": "AccountingSettings",
+  "type": "object",
+  "properties": {
+    "financial_year_start_month": {
+      "type": "number",
+      "default": 1,
+      "description": "Month number when financial year starts (1=Jan, 4=Apr, etc.)"
+    },
+    "default_currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "lock_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Global lock date \u2014 no entries before this date can be edited"
+    },
+    "tax_basis": {
+      "type": "string",
+      "enum": [
+        "Accrual",
+        "Cash"
+      ],
+      "default": "Accrual"
+    },
+    "auto_post_invoices": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically create journal entries when invoices are approved"
+    },
+    "auto_post_bills": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically create journal entries when bills are approved"
+    },
+    "accounts_receivable_id": {
+      "type": "string",
+      "description": "Default Accounts Receivable account"
+    },
+    "accounts_payable_id": {
+      "type": "string",
+      "description": "Default Accounts Payable account"
+    },
+    "sales_tax_account_id": {
+      "type": "string",
+      "description": "Default sales tax liability account"
+    },
+    "purchase_tax_account_id": {
+      "type": "string",
+      "description": "Default purchase tax asset account"
+    },
+    "retained_earnings_id": {
+      "type": "string",
+      "description": "Retained earnings account"
+    }
+  },
+  "required": []
+}

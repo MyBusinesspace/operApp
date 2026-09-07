@@ -1,0 +1,166 @@
+{
+  "name": "Quote",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Quote number e.g. Q-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal or customer reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title shown on the quote"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary / description shown below the title on the quote"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (customer)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached customer name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Sent",
+        "Accepted",
+        "Declined",
+        "Invoiced",
+        "Cancelled"
+      ],
+      "default": "Draft",
+      "description": "Quote status"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the quote was issued"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiry / validity date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code"
+    },
+    "incoterm": {
+      "type": "string",
+      "description": "Incoterm code applied to this quote (e.g. EXW, DAP, CIF)"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0,
+      "description": "Subtotal before tax"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Total tax amount"
+    },
+    "total": {
+      "type": "number",
+      "default": 0,
+      "description": "Grand total including tax"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes \u2014 not shown on the document"
+    },
+    "terms": {
+      "type": "string",
+      "description": "Terms & conditions shown on the printed / PDF document"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked task IDs"
+    },
+    "task_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task titles"
+    },
+    "task_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task reference codes (stable identifiers, e.g. TSK-2026-0286)"
+    },
+    "line_items": {
+      "type": "array",
+      "description": "Quote line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex photos attached to the quote",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded photo URL"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Photo caption / description"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "DocumentFile",
+  "type": "object",
+  "properties": {
+    "doc_type": {
+      "type": "string",
+      "enum": [
+        "invoice",
+        "quote",
+        "bill",
+        "purchase_order"
+      ],
+      "description": "Type of document this file belongs to"
+    },
+    "doc_id": {
+      "type": "string",
+      "description": "ID of the parent document"
+    },
+    "doc_number": {
+      "type": "string",
+      "description": "Cached document number for display"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded file URL"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional label or description"
+    },
+    "include_in_pdf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include this file as an annex page when printing the document to PDF / sharing the online quote"
+    }
+  },
+  "required": [
+    "doc_type",
+    "doc_id",
+    "file_name",
+    "file_url"
+  ]
+}

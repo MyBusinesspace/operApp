@@ -1,0 +1,50 @@
+{
+  "name": "RolePermission",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "office_staff",
+        "team_leader",
+        "field_staff"
+      ],
+      "description": "User role (admin always has full access)"
+    },
+    "module": {
+      "type": "string",
+      "description": "Module name e.g. timesheets, tasks, sales, hr, reports"
+    },
+    "can_view": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_create": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_edit": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_delete": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_approve": {
+      "type": "boolean",
+      "default": false,
+      "description": "Approve timesheets, amendments, etc."
+    },
+    "can_create_on_behalf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Create records (leave, petty cash) on behalf of another employee"
+    }
+  },
+  "required": [
+    "role",
+    "module"
+  ]
+}

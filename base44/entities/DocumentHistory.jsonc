@@ -1,0 +1,52 @@
+{
+  "name": "DocumentHistory",
+  "type": "object",
+  "properties": {
+    "doc_type": {
+      "type": "string",
+      "enum": [
+        "quote",
+        "invoice"
+      ],
+      "description": "Document type"
+    },
+    "doc_id": {
+      "type": "string",
+      "description": "ID of the quote or invoice (null if deleted)"
+    },
+    "doc_number": {
+      "type": "string",
+      "description": "Document number (preserved even after deletion)"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "Created",
+        "Updated",
+        "Status Changed",
+        "Deleted",
+        "Note Added",
+        "Printed",
+        "Converted to Invoice"
+      ],
+      "description": "Action performed"
+    },
+    "detail": {
+      "type": "string",
+      "description": "Human-readable detail of what changed"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who performed the action"
+    },
+    "note": {
+      "type": "string",
+      "description": "Manual note text (for Note Added action)"
+    }
+  },
+  "required": [
+    "doc_type",
+    "doc_number",
+    "action"
+  ]
+}

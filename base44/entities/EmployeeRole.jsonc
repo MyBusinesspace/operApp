@@ -1,0 +1,37 @@
+{
+  "name": "EmployeeRole",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Role name e.g. Field Staff, Team Leader"
+    },
+    "key": {
+      "type": "string",
+      "description": "Unique machine-friendly key e.g. field_staff"
+    },
+    "color": {
+      "type": "string",
+      "default": "#6366f1",
+      "description": "Hex color for the role badge"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "System roles cannot be deleted"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Manual column order in the permissions matrix (lower = further left)"
+    }
+  },
+  "required": [
+    "name",
+    "key"
+  ]
+}

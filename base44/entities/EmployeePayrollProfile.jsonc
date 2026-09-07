@@ -1,0 +1,156 @@
+{
+  "name": "EmployeePayrollProfile",
+  "type": "object",
+  "properties": {
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "part_time",
+        "hourly",
+        "contractor"
+      ],
+      "default": "full_time",
+      "description": "Nature of the employment contract"
+    },
+    "pay_type": {
+      "type": "string",
+      "enum": [
+        "salary",
+        "hourly"
+      ],
+      "default": "salary",
+      "description": "Whether employee earns a fixed salary or an hourly rate"
+    },
+    "basic_salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Monthly basic salary (used when pay_type = salary)"
+    },
+    "hourly_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Rate per hour (used when pay_type = hourly)"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this salary structure is effective"
+    },
+    "components": {
+      "type": "array",
+      "description": "Assigned payroll components (allowances, deductions, etc.)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "component_id": {
+            "type": "string"
+          },
+          "component_name": {
+            "type": "string"
+          },
+          "component_code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "calculation_method": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annual_leave_days": {
+      "type": "number",
+      "default": 30,
+      "description": "Annual paid leave entitlement in calendar days (UAE standard: 30)"
+    },
+    "leave_used_override": {
+      "type": "number",
+      "description": "Manual override for days already used this year (for mid-year onboarding). Leave blank for auto-calculation from approved vacation requests."
+    },
+    "yearly_leave_overrides": {
+      "type": "object",
+      "description": "Per-year manual overrides for the leave balance card. Keys are year strings (e.g. \"2025\"). Each value: { entitlement: number|null, used: number|null, remaining: number|null }. Null/missing = use the year-aware default (past year -> remaining 0, current year -> prorated accrual, future year -> entitlement 0).",
+      "properties": {},
+      "additionalProperties": true,
+      "default": {}
+    },
+    "last_annual_bonus_year": {
+      "type": "number",
+      "description": "Calendar year in which the annual leave bonus was last paid (prevents paying it more than once per year)"
+    },
+    "last_gratuity_year": {
+      "type": "number",
+      "description": "Calendar year in which the annual gratuity was last paid (prevents paying it more than once per year)"
+    },
+    "gratuity_total_override": {
+      "type": "number",
+      "description": "Manual override for the employee's total (net) gratuity balance. When set, replaces the computed value (accumulated gratuity from hire date minus total payments in history). Leave blank for auto-calculation."
+    },
+    "tax_country": {
+      "type": "string",
+      "default": "AE",
+      "description": "Country code determining which tax regime applies (e.g. AE, US, UK, SA, IN)"
+    },
+    "tax_status": {
+      "type": "string",
+      "enum": [
+        "resident",
+        "non_resident",
+        "exempt",
+        "expat"
+      ],
+      "default": "resident",
+      "description": "Employee tax residency / filing status \u2014 affects which rate bracket is used"
+    },
+    "tax_rate_override": {
+      "type": "number",
+      "description": "Manual tax rate % \u2014 overrides country + status lookup when set"
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "Employee bank name for salary transfer"
+    },
+    "iban": {
+      "type": "string",
+      "description": "International Bank Account Number"
+    },
+    "bank_routing": {
+      "type": "string",
+      "description": "Bank routing / SWIFT code"
+    },
+    "wps_id": {
+      "type": "string",
+      "description": "UAE Wage Protection System worker ID"
+    },
+    "tax_id": {
+      "type": "string",
+      "description": "Employee tax identification number (if applicable)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this profile is currently active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal HR notes"
+    }
+  },
+  "required": [
+    "employee_id"
+  ]
+}

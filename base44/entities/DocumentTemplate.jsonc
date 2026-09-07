@@ -1,0 +1,173 @@
+{
+  "name": "DocumentTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "document_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Supported document types: quote, invoice"
+    },
+    "page_size": {
+      "type": "string",
+      "enum": [
+        "A4",
+        "US Letter"
+      ],
+      "default": "A4"
+    },
+    "font": {
+      "type": "string",
+      "enum": [
+        "Inter",
+        "Georgia",
+        "Arial",
+        "Times New Roman",
+        "Helvetica"
+      ],
+      "default": "Inter"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#6366f1",
+      "description": "Brand accent color (hex)"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo URL"
+    },
+    "logo_size": {
+      "type": "number",
+      "default": 60,
+      "description": "Logo height in px used to scale the logo on previews and PDF"
+    },
+    "logo_position": {
+      "type": "string",
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ],
+      "default": "right"
+    },
+    "stamp_url": {
+      "type": "string",
+      "description": "Company stamp / seal image URL"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name shown on documents"
+    },
+    "company_name_font_size": {
+      "type": "number",
+      "default": 19,
+      "description": "Font size (pt) of the company name in the document header \u2014 applies to preview and PDF"
+    },
+    "body_font_size": {
+      "type": "number",
+      "default": 8.5,
+      "description": "Font size (pt) of the line items, notes and terms body text on quotes and invoices \u2014 applies to preview and PDF. Used directly when auto_text_scale is disabled."
+    },
+    "auto_text_scale": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically scale the body font size so the document fills the page (few line items \u2192 larger font, many items \u2192 compact). When disabled, the manual body_font_size is used."
+    },
+    "company_address": {
+      "type": "string",
+      "description": "Company address"
+    },
+    "company_phone": {
+      "type": "string"
+    },
+    "company_email": {
+      "type": "string"
+    },
+    "company_website": {
+      "type": "string"
+    },
+    "tax_id": {
+      "type": "string",
+      "description": "TRN / VAT number"
+    },
+    "show_logo": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_stamp": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show stamp on documents"
+    },
+    "show_tax_number": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_tax_column": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_unit_price": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_discount": {
+      "type": "boolean",
+      "default": false
+    },
+    "tax_display": {
+      "type": "string",
+      "enum": [
+        "exclusive",
+        "inclusive"
+      ],
+      "default": "exclusive"
+    },
+    "quote_title": {
+      "type": "string",
+      "default": "Quotation",
+      "description": "Title for Draft quotes"
+    },
+    "quote_title_sent": {
+      "type": "string",
+      "default": "Quotation",
+      "description": "Title for Sent/Accepted quotes"
+    },
+    "invoice_title_draft": {
+      "type": "string",
+      "default": "Proforma Invoice",
+      "description": "Title for Draft invoices"
+    },
+    "invoice_title": {
+      "type": "string",
+      "default": "Tax Invoice",
+      "description": "Title for Awaiting Approval / Awaiting Payment invoices"
+    },
+    "invoice_title_overdue": {
+      "type": "string",
+      "default": "Tax Invoice",
+      "description": "Title for overdue invoices"
+    },
+    "footer_notes": {
+      "type": "string",
+      "description": "Default footer text / payment terms"
+    },
+    "quote_terms": {
+      "type": "string",
+      "description": "Terms shown on quotes"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Use as default template"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

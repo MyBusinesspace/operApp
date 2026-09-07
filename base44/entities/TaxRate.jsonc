@@ -1,0 +1,19 @@
+{
+  "name": "TaxRate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tax rate name (e.g. VAT, Tax Exempt)"
+    },
+    "rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax percentage value (e.g. 5 for 5%)"
+    }
+  },
+  "required": [
+    "name",
+    "rate"
+  ]
+}

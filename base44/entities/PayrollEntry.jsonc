@@ -1,0 +1,203 @@
+{
+  "name": "PayrollEntry",
+  "type": "object",
+  "properties": {
+    "pay_period_id": {
+      "type": "string",
+      "description": "Reference to PayPeriod"
+    },
+    "pay_period_name": {
+      "type": "string",
+      "description": "Cached pay period name"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Cached employee name"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "part_time",
+        "hourly",
+        "contractor"
+      ],
+      "description": "Cached from EmployeePayrollProfile"
+    },
+    "pay_type": {
+      "type": "string",
+      "enum": [
+        "salary",
+        "hourly"
+      ],
+      "description": "Cached from EmployeePayrollProfile"
+    },
+    "regular_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Total regular hours worked in the period (from TimeEntry)"
+    },
+    "overtime_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Total overtime hours worked in the period"
+    },
+    "absent_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of absent working days (total, before leave offset)"
+    },
+    "paid_leave_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Portion of absent days covered by approved paid leave"
+    },
+    "late_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total minutes of lateness in the period"
+    },
+    "working_days_in_period": {
+      "type": "number",
+      "default": 0,
+      "description": "Total scheduled working days in this pay period"
+    },
+    "days_present": {
+      "type": "number",
+      "default": 0,
+      "description": "Days employee was present (working_days - absent_days)"
+    },
+    "basic_salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Base pay for the period (prorated if absent)"
+    },
+    "allowances_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all earning components (allowances, benefits)"
+    },
+    "overtime_pay": {
+      "type": "number",
+      "default": 0,
+      "description": "Calculated overtime compensation"
+    },
+    "bonus": {
+      "type": "number",
+      "default": 0,
+      "description": "One-time bonus for this period"
+    },
+    "gross_pay": {
+      "type": "number",
+      "default": 0,
+      "description": "basic_salary + allowances_total + overtime_pay + bonus"
+    },
+    "absence_deduction": {
+      "type": "number",
+      "default": 0,
+      "description": "Deduction for absent days (unpaid absences only)"
+    },
+    "late_deduction": {
+      "type": "number",
+      "default": 0,
+      "description": "Deduction for late arrivals"
+    },
+    "loan_deduction": {
+      "type": "number",
+      "default": 0,
+      "description": "Monthly loan/advance repayment deduction"
+    },
+    "other_deductions": {
+      "type": "number",
+      "default": 0,
+      "description": "Any other miscellaneous deductions"
+    },
+    "total_deductions": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all deductions"
+    },
+    "taxable_income": {
+      "type": "number",
+      "default": 0,
+      "description": "Income subject to tax"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Calculated tax (0 for UAE)"
+    },
+    "net_pay": {
+      "type": "number",
+      "default": 0,
+      "description": "gross_pay - total_deductions - tax_amount"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "approved",
+        "paid"
+      ],
+      "default": "draft",
+      "description": "Review lifecycle status of this individual entry"
+    },
+    "time_entries_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of TimeEntry records used in this calculation"
+    },
+    "line_items": {
+      "type": "array",
+      "description": "Detailed breakdown of all earnings and deductions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "component_id": {
+            "type": "string"
+          },
+          "component_name": {
+            "type": "string"
+          },
+          "component_code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "HR notes for this entry"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "User ID who reviewed this entry"
+    },
+    "reviewed_by_name": {
+      "type": "string",
+      "description": "Cached reviewer name"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "ISO timestamp of review"
+    }
+  },
+  "required": [
+    "pay_period_id",
+    "employee_id"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "EmployeeGroup",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Group name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

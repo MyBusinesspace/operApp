@@ -1,0 +1,68 @@
+{
+  "name": "PayrollLineItem",
+  "type": "object",
+  "properties": {
+    "payroll_entry_id": {
+      "type": "string",
+      "description": "Reference to PayrollEntry"
+    },
+    "pay_period_id": {
+      "type": "string",
+      "description": "Reference to PayPeriod (for filtering)"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to Employee (for filtering)"
+    },
+    "component_id": {
+      "type": "string",
+      "description": "Reference to PayrollComponent"
+    },
+    "component_name": {
+      "type": "string",
+      "description": "Cached component name"
+    },
+    "component_code": {
+      "type": "string",
+      "description": "Cached component code"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "earning",
+        "deduction",
+        "tax",
+        "benefit"
+      ],
+      "description": "Type of line item"
+    },
+    "calculation_method": {
+      "type": "string",
+      "description": "How this amount was calculated"
+    },
+    "base_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "The base figure used for percentage calculations"
+    },
+    "rate": {
+      "type": "number",
+      "description": "Percentage rate if applicable"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Final computed amount for this line"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Explanation of how this line was computed"
+    }
+  },
+  "required": [
+    "payroll_entry_id",
+    "employee_id",
+    "type",
+    "amount"
+  ]
+}

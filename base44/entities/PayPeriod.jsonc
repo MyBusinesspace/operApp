@@ -1,0 +1,95 @@
+{
+  "name": "PayPeriod",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name e.g. June 2025"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "First day of the pay period"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last day of the pay period"
+    },
+    "pay_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date on which employees will be paid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "approved",
+        "paid",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Current lifecycle state of this payroll run"
+    },
+    "selected_employee_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specific employees to include in this pay run. Empty = all active employees with a payroll profile."
+    },
+    "total_gross": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all gross pay across entries"
+    },
+    "total_deductions": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all deductions across entries"
+    },
+    "total_net": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all net pay across entries"
+    },
+    "total_tax": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of all tax amounts across entries"
+    },
+    "employee_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of employees included in this pay run"
+    },
+    "notes": {
+      "type": "string",
+      "description": "HR notes for this pay period"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "User ID who approved the payroll run"
+    },
+    "approved_by_name": {
+      "type": "string",
+      "description": "Cached approver name"
+    },
+    "approved_at": {
+      "type": "string",
+      "description": "ISO timestamp of approval"
+    },
+    "paid_at": {
+      "type": "string",
+      "description": "ISO timestamp when payroll was marked as paid"
+    }
+  },
+  "required": [
+    "name",
+    "start_date",
+    "end_date",
+    "pay_date"
+  ]
+}

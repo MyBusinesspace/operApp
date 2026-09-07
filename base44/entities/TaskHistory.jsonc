@@ -1,0 +1,43 @@
+{
+  "name": "TaskHistory",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "Reference to Task"
+    },
+    "task_reference": {
+      "type": "string",
+      "description": "Cached task reference"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "Created",
+        "Updated",
+        "Status Changed",
+        "Deleted",
+        "Note Added",
+        "Assigned",
+        "Printed"
+      ],
+      "description": "Action performed"
+    },
+    "detail": {
+      "type": "string",
+      "description": "Human-readable detail of what changed"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who performed the action"
+    },
+    "note": {
+      "type": "string",
+      "description": "Manual note text (for Note Added action)"
+    }
+  },
+  "required": [
+    "task_id",
+    "action"
+  ]
+}

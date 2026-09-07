@@ -1,0 +1,27 @@
+{
+  "name": "EmployeeDocumentType",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Document type name (e.g. Passport, Visa, Driver License)"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color for badge display",
+      "default": "#6366f1"
+    },
+    "requires_expiry": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this document type requires an expiry date"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

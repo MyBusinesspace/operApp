@@ -1,0 +1,29 @@
+{
+  "name": "WorkOrderNote",
+  "type": "object",
+  "properties": {
+    "work_order_id": {
+      "type": "string",
+      "description": "Reference to WorkOrder"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note content"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "Note",
+        "Call",
+        "Email",
+        "Meeting",
+        "Update"
+      ],
+      "default": "Note"
+    }
+  },
+  "required": [
+    "work_order_id",
+    "note"
+  ]
+}

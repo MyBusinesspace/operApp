@@ -1,0 +1,22 @@
+# OPERAPP LOCAL BRIDGE — DO NOT REPLACE
+#
+# When syncing / replacing files from Base44, you MAY overwrite:
+#   src/pages/**
+#   src/components/**
+#   src/hooks/**
+#   src/lib/**          (including AuthContext.jsx)
+#   src/App.jsx
+#   src/api/base44Client.js
+#   base44/**
+#
+# You MUST KEEP (never overwrite from Base44 export):
+#   packages/base44-compat/**
+#   vite.config.js          (@base44/sdk → packages/base44-compat)
+#   supabase/**
+#   scripts/**
+#   .env.local / supabase/.env
+#   package.json scripts (db:*, env:sync, auth:google, schema:generate)
+#
+# All behavior changes (auth, Google, admin bootstrap, storage, entities)
+# live ONLY under packages/base44-compat so Base44 page replacements
+# keep working via the Vite alias.

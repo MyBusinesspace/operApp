@@ -1,0 +1,22 @@
+{
+  "name": "WorkOrderCategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Category name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#6366f1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "MobileApp",
+  "type": "object",
+  "properties": {
+    "android_path": {
+      "type": "string",
+      "description": "Android app path or download URL"
+    },
+    "ios_path": {
+      "type": "string",
+      "description": "iOS app path or download URL"
+    },
+    "app_version": {
+      "type": "string",
+      "description": "App version number e.g. 1.0.0"
+    },
+    "version_description": {
+      "type": "string",
+      "description": "Description of this version / release notes"
+    }
+  },
+  "required": []
+}

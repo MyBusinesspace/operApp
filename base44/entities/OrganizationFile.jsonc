@@ -1,0 +1,47 @@
+{
+  "name": "OrganizationFile",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "description": "Reference to Organization"
+    },
+    "name": {
+      "type": "string",
+      "description": "File name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated file reference code e.g. FILE-TL-2026-0001"
+    },
+    "file_type_id": {
+      "type": "string",
+      "description": "Reference to FileType"
+    },
+    "file_type_name": {
+      "type": "string",
+      "description": "Cached file type name"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes"
+    }
+  },
+  "required": [
+    "organization_id",
+    "name",
+    "file_url"
+  ]
+}

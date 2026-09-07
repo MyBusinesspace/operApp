@@ -1,0 +1,62 @@
+{
+  "name": "OperationsSettings",
+  "type": "object",
+  "properties": {
+    "track_gps_location": {
+      "type": "boolean",
+      "default": true,
+      "description": "Record location when clocking in/out"
+    },
+    "require_work_order": {
+      "type": "boolean",
+      "default": false,
+      "description": "Employees must select a work order to clock in"
+    },
+    "allow_manual_edit": {
+      "type": "boolean",
+      "default": true,
+      "description": "Employees can edit their timesheet times"
+    },
+    "enable_alarms": {
+      "type": "boolean",
+      "default": false,
+      "description": "Notify employees before work order start time"
+    },
+    "alarm_minutes_before": {
+      "type": "number",
+      "default": 5,
+      "description": "Minutes before start time to send alarm"
+    },
+    "gps_accuracy_threshold_m": {
+      "type": "number",
+      "default": 15,
+      "description": "Minimum GPS accuracy required (meters)"
+    },
+    "tracking_interval_min": {
+      "type": "number",
+      "default": 15,
+      "description": "How often to record GPS location while clocked in (0 = disabled)"
+    },
+    "require_photo_clock_in": {
+      "type": "boolean",
+      "default": false,
+      "description": "Employees must take a photo when clocking in"
+    },
+    "require_photo_clock_out": {
+      "type": "boolean",
+      "default": false,
+      "description": "Employees must take a photo when clocking out"
+    },
+    "require_photo_task_switch": {
+      "type": "boolean",
+      "default": false,
+      "description": "Employees must take a photo when switching tasks"
+    },
+    "show_timesheet_photos_column": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show photos column in timesheet table"
+    }
+  },
+  "required": []
+}
