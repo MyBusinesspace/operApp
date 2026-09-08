@@ -6,6 +6,12 @@ import {
   getLoginUrl,
 } from "../utils/auth-utils.js";
 import { toBase44Error } from "../utils/errors.js";
+import {
+  PENDING_OAUTH_TOKEN,
+  clearStoredSession,
+  hasPendingOAuthCallback,
+  startedWithOAuthCallback,
+} from "../session-bootstrap.js";
 
 function mapAuthUser(user, profile = {}) {
   if (!user) return null;
@@ -227,6 +233,45 @@ async function ensureProfile(user, extras = {}) {
   return profile;
 }
 
+/**
+ * Returns the current session, waiting for an in-flight OAuth redirect to be
+ * exchanged. Without this the first load after Google sign-in looks signed-out.
+ */
+async function resolveSession(timeoutMs = 12000) {
+  const supabase = getSupabase();
+  const { data } = await supabase.auth.getSession();
+  if (data?.session) return data.session;
+
+  const pending =
+    startedWithOAuthCallback() ||
+    hasPendingOAuthCallback() ||
+    getAccessToken() === PENDING_OAUTH_TOKEN;
+  if (!pending) return null;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let subscription = null;
+
+    const finish = (session) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      subscription?.unsubscribe?.();
+      resolve(session);
+    };
+
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    subscription = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) finish(session);
+    }).data?.subscription;
+
+    // The exchange may have completed between getSession() and subscribing.
+    supabase.auth.getSession().then(({ data: latest }) => {
+      if (latest?.session) finish(latest.session);
+    });
+  });
+}
+
 async function syncTokenFromSession() {
   const supabase = getSupabase();
   const { data } = await supabase.auth.getSession();
@@ -240,32 +285,11 @@ export function createAuthModule(options = {}) {
 
   return {
     async me() {
-      const supabase = getSupabase();
-      const result = await Promise.race([
-        supabase.auth.getUser(),
-        new Promise((_, reject) =>
-          setTimeout(
-            () =>
-              reject(
-                toBase44Error(
-                  {
-                    // Not 401/403: original AuthContext maps those to auth_required
-                    // which calls redirectToLogin() during render and breaks /login.
-                    message: "Authentication timeout",
-                    status: 440,
-                    code: "AUTH_TIMEOUT",
-                    data: {},
-                  },
-                  440
-                )
-              ),
-            8000
-          )
-        ),
-      ]);
-      const { data, error } = result;
-      if (error || !data?.user) {
+      const session = await resolveSession();
+      if (!session?.user) {
         removeAccessToken();
+        // Not 401/403: AuthContext maps those to auth_required, which calls
+        // redirectToLogin() during render and traps the login page in a loop.
         throw toBase44Error(
           {
             message: "Not authenticated",
@@ -276,8 +300,10 @@ export function createAuthModule(options = {}) {
           440
         );
       }
-      const profile = await ensureProfile(data.user);
-      return mapAuthUser(data.user, profile);
+
+      if (session.access_token) saveAccessToken(session.access_token);
+      const profile = await ensureProfile(session.user);
+      return mapAuthUser(session.user, profile);
     },
 
     async updateMe(payload = {}) {
@@ -343,16 +369,17 @@ export function createAuthModule(options = {}) {
         const { configured } = getSupabaseConfig();
         if (configured) {
           const supabase = getSupabase();
-          await supabase.auth.signOut();
+          // Global sign-out fails when the session is already gone server-side.
+          await supabase.auth.signOut({ scope: "local" });
         }
       } catch (e) {
         console.warn("logout error", e);
       }
-      removeAccessToken();
-      // AuthContext calls logout() with no args to clear token without navigation.
-      if (typeof redirectUrl === "string" && redirectUrl.length) {
-        window.location.href = redirectUrl;
-      }
+      clearStoredSession();
+
+      const target =
+        typeof redirectUrl === "string" && redirectUrl.length ? redirectUrl : "/login";
+      window.location.href = target;
     },
 
     setToken(token, saveToStorage = true) {

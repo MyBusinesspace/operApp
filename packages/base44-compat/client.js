@@ -1,3 +1,5 @@
+// Side-effect import: seeds the legacy token before `app-params` reads storage.
+import "./session-bootstrap.js";
 import { createAuthModule } from "./modules/auth.js";
 import { createEntitiesModule } from "./modules/entities.js";
 import { createFunctionsModule } from "./modules/functions.js";
@@ -10,14 +12,6 @@ import { getSupabase, getSupabaseConfig } from "./supabase.js";
  * Drop-in replacement for @base44/sdk createClient — backed by Supabase.
  */
 export function createClient(config = {}) {
-  // Clear legacy Base44 tokens immediately so AuthContext does not treat them as a session.
-  // A real Supabase session is restored below and re-saved to the legacy key.
-  if (!config.token) {
-    removeAccessToken();
-  } else {
-    saveAccessToken(config.token);
-  }
-
   const { configured } = getSupabaseConfig();
   if (configured) {
     try {
@@ -27,9 +21,9 @@ export function createClient(config = {}) {
           saveAccessToken(data.session.access_token);
         }
       });
-      supabase.auth.onAuthStateChange((_event, session) => {
+      supabase.auth.onAuthStateChange((event, session) => {
         if (session?.access_token) saveAccessToken(session.access_token);
-        else removeAccessToken();
+        else if (event === "SIGNED_OUT") removeAccessToken();
       });
     } catch (e) {
       console.warn("[compat] supabase session hydrate failed", e);
