@@ -65,15 +65,42 @@ async function ensureBootstrapRoles() {
   await supabase.from("employee_role").insert(roles);
 }
 
+/**
+ * Returns the Employee row for this auth user, linking or creating it as needed.
+ * Linking by email first prevents duplicates when an admin pre-creates staff.
+ */
 async function ensureEmployeeLink(user, profile) {
-  if (!user?.id) return;
+  if (!user?.id) return null;
   const supabase = getSupabase();
   const { data: existing } = await supabase
     .from("employee")
-    .select("id")
+    .select("*")
     .eq("user_id", user.id)
     .limit(1);
-  if (existing?.length) return;
+  if (existing?.length) return existing[0];
+
+  if (user.email) {
+    const { data: byEmail } = await supabase
+      .from("employee")
+      .select("*")
+      .ilike("email", user.email)
+      .limit(1);
+    const candidate = byEmail?.[0];
+    if (candidate && !candidate.user_id) {
+      const { data: linked } = await supabase
+        .from("employee")
+        .update({
+          user_id: user.id,
+          user_email: user.email,
+          updated_date: new Date().toISOString(),
+        })
+        .eq("id", candidate.id)
+        .select("*")
+        .maybeSingle();
+      return linked || { ...candidate, user_id: user.id };
+    }
+    if (candidate) return candidate;
+  }
 
   const meta = user.user_metadata || {};
   const fullName =
@@ -90,20 +117,44 @@ async function ensureEmployeeLink(user, profile) {
             : "Admin";
 
   const now = new Date().toISOString();
-  await supabase.from("employee").insert({
-    id: crypto.randomUUID(),
-    created_date: now,
-    updated_date: now,
-    created_by: user.email,
-    created_by_id: user.id,
-    full_name: fullName,
-    email: user.email,
-    role: roleLabel,
-    status: "Active",
-    user_id: user.id,
-    user_email: user.email,
-    department: "Management",
-  });
+  const { data: created } = await supabase
+    .from("employee")
+    .insert({
+      id: crypto.randomUUID(),
+      created_date: now,
+      updated_date: now,
+      created_by: user.email,
+      created_by_id: user.id,
+      full_name: fullName,
+      email: user.email,
+      role: roleLabel,
+      status: "Active",
+      user_id: user.id,
+      user_email: user.email,
+      department: "Management",
+    })
+    .select("*")
+    .maybeSingle();
+  return created || null;
+}
+
+/**
+ * The app treats `user.role === "admin"` as full access, while HR assigns the
+ * Employee "Admin" role. Bridge the two so admin staff really get admin rights.
+ */
+async function employeeRoleIsAdmin(employee) {
+  if (!employee?.role) return false;
+  const label = String(employee.role).trim().toLowerCase();
+  if (label === "admin") return true;
+
+  const supabase = getSupabase();
+  const { data: roles } = await supabase.from("employee_role").select("name,key").limit(200);
+  const match = (roles || []).find(
+    (r) =>
+      String(r.name || "").trim().toLowerCase() === label ||
+      String(r.key || "").trim().toLowerCase() === label
+  );
+  return String(match?.key || "").trim().toLowerCase() === "admin";
 }
 
 /**
@@ -122,7 +173,9 @@ async function ensureProfile(user, extras = {}) {
 
   if (existing?.id) {
     let profile = existing;
-    if (shouldBeAdmin && existing.role !== "admin") {
+    const employee = await ensureEmployeeLink(user, profile);
+    const promote = shouldBeAdmin || (await employeeRoleIsAdmin(employee));
+    if (promote && existing.role !== "admin") {
       const { data } = await supabase
         .from("users")
         .update({ role: "admin", updated_date: new Date().toISOString() })
@@ -130,8 +183,16 @@ async function ensureProfile(user, extras = {}) {
         .select("*")
         .maybeSingle();
       profile = data || { ...existing, role: "admin" };
+    } else if (!promote && existing.role === "admin" && employee?.role) {
+      // HR downgraded this person: stop granting the admin bypass.
+      const { data } = await supabase
+        .from("users")
+        .update({ role: "office_staff", updated_date: new Date().toISOString() })
+        .eq("id", user.id)
+        .select("*")
+        .maybeSingle();
+      profile = data || { ...existing, role: "office_staff" };
     }
-    await ensureEmployeeLink(user, profile);
     return profile;
   }
 
@@ -150,8 +211,19 @@ async function ensureProfile(user, extras = {}) {
   if (shouldBeAdmin) row.role = "admin";
 
   const { data } = await supabase.from("users").upsert(row).select("*").maybeSingle();
-  const profile = data || row;
-  await ensureEmployeeLink(user, profile);
+  let profile = data || row;
+  const employee = await ensureEmployeeLink(user, profile);
+
+  if (profile.role !== "admin" && (await employeeRoleIsAdmin(employee))) {
+    const { data: promoted } = await supabase
+      .from("users")
+      .update({ role: "admin", updated_date: new Date().toISOString() })
+      .eq("id", user.id)
+      .select("*")
+      .maybeSingle();
+    profile = promoted || { ...profile, role: "admin" };
+  }
+
   return profile;
 }
 
