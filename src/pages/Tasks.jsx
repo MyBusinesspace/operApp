@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { withRetry, batchedAll } from "@/lib/apiHelpers";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckSquare, Plus, Search, Pencil, Trash2, Clock, FolderKanban, ClipboardList, ChevronDown, ChevronRight, ChevronUp, ArrowUpDown, User, Package, Users, RefreshCw, FileText, Square, Zap, Copy, FileCheck2, Sparkles, Archive, ArchiveRestore } from "lucide-react";
+import { CheckSquare, Plus, Search, Pencil, Trash2, Clock, FolderKanban, ClipboardList, ChevronDown, ChevronRight, ChevronUp, ArrowUpDown, User, Package, Users, RefreshCw, FileText, Square, Zap, Copy, FileCheck2, Sparkles, Archive, ArchiveRestore, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/csvExport";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -542,6 +543,28 @@ export default function Tasks() {
   const openEdit = (t) => { setEditing(t); setModal(true); };
   const openAdd  = () => { setEditing(null); setModal(true); };
 
+  const exportCSV = () => {
+    exportToCSV(`tasks-${new Date().toISOString().slice(0, 10)}`, [
+      { key: "reference", label: "Reference" },
+      { key: "title", label: "Title" },
+      { key: "description", label: "Description" },
+      { key: "category", label: "Category" },
+      { key: r => getEffectiveStatus(r), label: "Status" },
+      { key: "priority", label: "Priority" },
+      { key: "work_order_name", label: "Work Order" },
+      { key: "project_name", label: "Project" },
+      { key: "contact_name", label: "Client" },
+      { key: "asset_name", label: "Asset" },
+      { key: r => (r.assigned_employee_names || []).join("; "), label: "Assigned Employees" },
+      { key: r => (r.assigned_user_names || []).join("; "), label: "Assigned Users" },
+      { key: "planning_date", label: "Planning Date" },
+      { key: "planning_time_in", label: "Time In" },
+      { key: "planning_time_out", label: "Time Out" },
+      { key: "location_address", label: "Location" },
+      { key: "created_date", label: "Created Date" },
+    ], sorted);
+  };
+
   const toggleExpand = (id) => setExpandedTask(prev => prev === id ? null : id);
   const toggleReports = (id) => setExpandedReports(prev => prev === id ? null : id);
   const toggleHistory = (id) => setExpandedHistory(prev => prev === id ? null : id);
@@ -573,6 +596,9 @@ export default function Tasks() {
               <Trash2 className="w-4 h-4" /> {deleting ? "Deleting…" : `Delete (${selectedIds.size})`}
             </Button>
           )}
+          <Button variant="outline" className="gap-2" onClick={exportCSV} disabled={sorted.length === 0}>
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
           <div className="flex flex-col gap-2">
             <Button className="gap-2 shadow-sm" onClick={openAdd}>
               <Plus className="w-4 h-4" /> New Task

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Plus, Search, Users, Mail, Phone, Pencil, Trash2, Calendar, Briefcase } from "lucide-react";
+import { Plus, Search, Users, Mail, Phone, Pencil, Trash2, Calendar, Briefcase, Download, Upload } from "lucide-react";
+import { exportToCSV } from "@/lib/csvExport";
+import EmployeeDocumentImportModal from "@/components/employees/EmployeeDocumentImportModal";
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,8 @@ export default function Employees() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const { sortKey, sortDir, handleSort, applySorting } = useSortable();
 
   const load = async () => {
@@ -101,6 +105,47 @@ export default function Employees() {
   };
   const openAdd = () => { setEditing(null); setModalOpen(true); };
 
+  const exportCSV = async () => {
+    setExporting(true);
+    try {
+      // Fetch leave requests to compute per-employee leave totals
+      const leaveRequests = await base44.entities.LeaveRequest.list("-created_date", 5000);
+      const leaveByEmp = {};
+      (leaveRequests || []).forEach(r => {
+        if (!r.employee_id) return;
+        if (!leaveByEmp[r.employee_id]) leaveByEmp[r.employee_id] = { vacation: 0, sick: 0, other: 0, pending: 0, approved: 0, rejected: 0 };
+        const days = r.total_days || 0;
+        if (r.leave_type === "vacation") leaveByEmp[r.employee_id].vacation += days;
+        else if (r.leave_type === "sick") leaveByEmp[r.employee_id].sick += days;
+        else if (r.leave_type === "other") leaveByEmp[r.employee_id].other += days;
+        if (r.status === "approved") leaveByEmp[r.employee_id].approved += days;
+        else if (r.status === "pending") leaveByEmp[r.employee_id].pending += 1;
+        else if (r.status === "rejected") leaveByEmp[r.employee_id].rejected += 1;
+      });
+      exportToCSV(`employees-with-leaves-${new Date().toISOString().slice(0, 10)}`, [
+        { key: "full_name", label: "Full Name" },
+        { key: "employee_no", label: "Employee No" },
+        { key: "role", label: "Role" },
+        { key: "department", label: "Department" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "Phone" },
+        { key: "status", label: "Status" },
+        { key: "hire_date", label: "Hire Date" },
+        { key: "team_name", label: "Team" },
+        { key: "bank_account", label: "Bank Account" },
+        { key: e => (leaveByEmp[e.id]?.vacation || 0), label: "Vacation Days" },
+        { key: e => (leaveByEmp[e.id]?.sick || 0), label: "Sick Days" },
+        { key: e => (leaveByEmp[e.id]?.other || 0), label: "Other Leave Days" },
+        { key: e => (leaveByEmp[e.id]?.approved || 0), label: "Approved Leave Days" },
+        { key: e => (leaveByEmp[e.id]?.pending || 0), label: "Pending Requests" },
+        { key: e => (leaveByEmp[e.id]?.rejected || 0), label: "Rejected Requests" },
+        { key: "notes", label: "Notes" },
+      ], filtered);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -115,9 +160,17 @@ export default function Employees() {
             <p className="text-sm text-muted-foreground mt-0.5">Manage staff profiles, roles, and contact information</p>
           </div>
         </div>
-        <Button className="gap-2 shadow-sm" onClick={openAdd}>
-          <Plus className="w-4 h-4" /> Add Employee
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+            <Upload className="w-4 h-4" /> Import Documents
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={exportCSV} disabled={exporting || filtered.length === 0}>
+            <Download className="w-4 h-4" /> {exporting ? "Exporting..." : "Export CSV"}
+          </Button>
+          <Button className="gap-2 shadow-sm" onClick={openAdd}>
+            <Plus className="w-4 h-4" /> Add Employee
+          </Button>
+        </div>
       </motion.div>
 
       {/* Stats */}
@@ -294,6 +347,12 @@ export default function Employees() {
         onClose={() => { setModalOpen(false); setEditing(null); }}
         onSave={handleSave}
         employee={editing}
+      />
+
+      <EmployeeDocumentImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onSaved={() => load()}
       />
     </div>
   );

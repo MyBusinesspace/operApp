@@ -73,12 +73,22 @@ lines.push(`$$ language plpgsql;`);
 lines.push(``);
 
 const tableNames = [];
+const fieldTypes = {};
 
 for (const file of files) {
   const schema = parseJsonc(fs.readFileSync(path.join(entitiesDir, file), "utf8"));
   const entityName = schema.name || path.basename(file, ".jsonc");
   const table = entityToTable(entityName);
   tableNames.push({ entityName, table });
+  const columnTypes = {
+    id: "text",
+    created_date: "timestamptz",
+    updated_date: "timestamptz",
+    created_by: "text",
+    created_by_id: "text",
+    is_sample: "boolean",
+  };
+  fieldTypes[entityName] = columnTypes;
 
   lines.push(`-- Entity: ${entityName}`);
   lines.push(`create table if not exists public.${table} (`);
@@ -97,6 +107,7 @@ for (const file of files) {
       return;
     }
     const colType = sqlType(prop);
+    columnTypes[name] = colType;
     // Soften NOT NULL for migration flexibility except keep semantic defaults
     let propForDefault = prop;
     if (table === "users" && name === "role" && prop.default === undefined) {
@@ -115,6 +126,8 @@ for (const file of files) {
   if (table === "users") {
     if (!props.email) lines.push(`  email text,`);
     if (!props.full_name) lines.push(`  full_name text,`);
+    columnTypes.email = "text";
+    columnTypes.full_name = "text";
   }
 
   // Remove trailing comma from last column line
@@ -185,6 +198,11 @@ const mapFile = path.join(root, "packages", "base44-compat", "entity-table-map.j
 const map = Object.fromEntries(tableNames.map(({ entityName, table }) => [entityName, table]));
 fs.writeFileSync(mapFile, JSON.stringify(map, null, 2) + "\n", "utf8");
 
+// Column types per entity so the compat layer can coerce form values (e.g. "" → null on dates)
+const typesFile = path.join(root, "packages", "base44-compat", "entity-field-types.json");
+fs.writeFileSync(typesFile, JSON.stringify(fieldTypes, null, 2) + "\n", "utf8");
+
 console.log(`Wrote ${outFile}`);
 console.log(`Wrote ${mapFile}`);
+console.log(`Wrote ${typesFile}`);
 console.log(`Tables: ${tableNames.length}`);

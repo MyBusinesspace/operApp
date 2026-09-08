@@ -1,5 +1,5 @@
 -- Auto-generated from base44/entities — do not edit by hand
--- Regenerated: 2026-09-07T07:19:47.878Z
+-- Regenerated: 2026-09-08T08:17:06.979Z
 -- Tables mirror Base44 entity schemas (field names preserved)
 
 create extension if not exists "pgcrypto";

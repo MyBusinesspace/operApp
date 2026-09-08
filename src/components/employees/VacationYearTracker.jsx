@@ -24,6 +24,7 @@ export default function VacationYearTracker({
 }) {
   const [editingYear, setEditingYear] = useState(null);
   const [editNotes, setEditNotes] = useState("");
+  const [editSalary, setEditSalary] = useState("");
   const [uploadingYear, setUploadingYear] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -78,11 +79,16 @@ export default function VacationYearTracker({
   const startEdit = (year) => {
     const ov = yearlyOverrides[String(year)] || {};
     setEditNotes(ov.notes || "");
+    setEditSalary(ov.salary != null ? String(ov.salary) : "");
     setEditingYear(year);
   };
 
   const saveEdit = async (year) => {
-    await saveOverride(year, { notes: editNotes });
+    const patch = { notes: editNotes };
+    const parsed = parseFloat(editSalary);
+    if (!isNaN(parsed) && parsed >= 0) patch.salary = parsed;
+    else if (editSalary === "") patch.salary = null;
+    await saveOverride(year, patch);
     setEditingYear(null);
   };
 
@@ -148,6 +154,9 @@ export default function VacationYearTracker({
           // What to show: days if taken, money if not
           const showMoney = !taken && isPast;
           const showDays = taken || isCurrent;
+          // Per-year salary override (historical salary for that year), falls back to current basic salary
+          const yearSalary = override.salary != null ? override.salary : basicSalary;
+          const isEditing = editingYear === year;
 
           return (
             <div key={year} className="flex items-center gap-2 px-4 py-1.5 hover:bg-muted/20 transition-colors text-sm group">
@@ -173,23 +182,56 @@ export default function VacationYearTracker({
                 {taken ? <Check className="w-3 h-3" /> : isPast ? <X className="w-3 h-3" /> : ""}
               </button>
 
-              {/* Days or Money */}
-              <div className="flex-1 min-w-0 flex items-center gap-2">
-                {showMoney ? (
-                  <span className="text-red-600 font-bold tabular-nums text-sm">
-                    {fmtAED(basicSalary)} <span className="text-[10px] text-muted-foreground font-normal ml-1">compensation due</span>
-                  </span>
-                ) : showDays ? (
-                  <span className="text-foreground tabular-nums">
-                    <span className="font-semibold">{used}</span>
-                    <span className="text-muted-foreground text-xs"> / {entitlement}d</span>
-                    {isProrated && <span className="text-[9px] text-amber-600 ml-1">prorated</span>}
-                  </span>
+              {/* Center: days/money + inline edit (salary + notes) */}
+              <div className="flex-1 min-w-0 flex items-center justify-center gap-2">
+                {isEditing ? (
+                  <div className="flex items-center gap-1.5 justify-center">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={editSalary}
+                      onChange={e => setEditSalary(e.target.value)}
+                      placeholder="Salary AED"
+                      className="h-6 w-24 text-xs py-0 px-1.5 tabular-nums"
+                      title="Historical basic salary for this year (AED)"
+                    />
+                    <Input
+                      type="text"
+                      value={editNotes}
+                      onChange={e => setEditNotes(e.target.value)}
+                      placeholder="Notes..."
+                      className="h-6 w-40 text-xs py-0 px-1.5"
+                      title="Notes for this year"
+                      onKeyDown={e => { if (e.key === "Enter") saveEdit(year); if (e.key === "Escape") setEditingYear(null); }}
+                    />
+                    <Button variant="default" size="sm" className="h-6 w-6 p-0" onClick={() => saveEdit(year)} disabled={saving}>
+                      <Check className="w-3 h-3" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setEditingYear(null)}>
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
                 ) : (
-                  <span className="text-muted-foreground text-xs">—</span>
-                )}
-                {override.notes && editingYear !== year && (
-                  <span className="text-[10px] text-muted-foreground italic truncate hidden md:inline">"{override.notes}"</span>
+                  <>
+                    {showMoney ? (
+                      <span className="text-red-600 font-bold tabular-nums text-sm">
+                        {fmtAED(yearSalary)} <span className="text-[10px] text-muted-foreground font-normal ml-1">compensation due</span>
+                        {override.salary != null && <span className="text-[9px] text-amber-600 ml-1" title="Historical salary override">★</span>}
+                      </span>
+                    ) : showDays ? (
+                      <span className="text-foreground tabular-nums">
+                        <span className="font-semibold">{used}</span>
+                        <span className="text-muted-foreground text-xs"> / {entitlement}d</span>
+                        {isProrated && <span className="text-[9px] text-amber-600 ml-1">prorated</span>}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                    {override.notes && (
+                      <span className="text-[10px] text-muted-foreground italic truncate max-w-[200px]">"{override.notes}"</span>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -236,41 +278,13 @@ export default function VacationYearTracker({
                 )}
               </div>
 
-              {/* Edit / notes */}
-              {editingYear === year ? (
-                <div className="shrink-0 flex items-center gap-1">
-                  <Input
-                    type="text"
-                    value={editNotes}
-                    onChange={e => setEditNotes(e.target.value)}
-                    placeholder="Notes..."
-                    className="h-6 w-32 text-xs py-0 px-1.5"
-                    autoFocus
-                  />
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={() => saveEdit(year)}
-                    disabled={saving}
-                  >
-                    <Check className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={() => setEditingYear(null)}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
-              ) : (
+              {/* Edit button (hidden while editing — the panel is in the center) */}
+              {!isEditing && (
                 <button
                   onClick={() => startEdit(year)}
                   disabled={saving}
                   className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                  title="Edit notes"
+                  title="Edit salary & notes"
                 >
                   <Pencil className="w-3 h-3" />
                 </button>

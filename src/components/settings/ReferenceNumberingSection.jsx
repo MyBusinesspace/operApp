@@ -14,7 +14,7 @@ async function runRenameJob(storageKey, entityName, form, recordId, onProgress) 
   const entity = base44.entities[entityName];
   let allRecords = [];
   let page = 0;
-  const pageSize = 200;
+  const pageSize = 500;
   while (true) {
     const batch = await entity.list("-created_date", pageSize, page * pageSize);
     if (!batch || batch.length === 0) break;
@@ -28,25 +28,30 @@ async function runRenameJob(storageKey, entityName, form, recordId, onProgress) 
   onProgress && onProgress({ ...window.__renamingJobs[storageKey] });
 
   const year = new Date().getFullYear();
-  const DELAY_MS = 300;
+  const BATCH_SIZE = 500;
 
-  for (let i = 0; i < allRecords.length; i++) {
-    if (!window.__renamingJobs[storageKey]) break;
-    const r = allRecords[i];
+  // Build all updates with new reference codes
+  const updates = allRecords.map((r, i) => {
     const num = i + 1;
     const padded = String(num).padStart(form.number_padding || 4, "0");
     const newRef = form.include_year
       ? `${form.prefix}-${year}-${padded}`
       : `${form.prefix}-${padded}`;
-    await entity.update(r.id, { reference: newRef });
-    window.__renamingJobs[storageKey].current = i + 1;
+    return { id: r.id, reference: newRef };
+  });
+
+  // Send in chunks of BATCH_SIZE via bulkUpdate (single API call per chunk)
+  let processed = 0;
+  for (let start = 0; start < updates.length; start += BATCH_SIZE) {
+    if (!window.__renamingJobs[storageKey]) break;
+    const chunk = updates.slice(start, start + BATCH_SIZE);
+    await entity.bulkUpdate(chunk);
+    processed += chunk.length;
+    window.__renamingJobs[storageKey].current = processed;
     onProgress && onProgress({ ...window.__renamingJobs[storageKey] });
-    if (i < allRecords.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-    }
   }
 
-  const updated = allRecords.length;
+  const updated = processed;
   const newForm = { ...form, next_number: updated + 1 };
   const data = { name: storageKey, footer_notes: JSON.stringify(newForm) };
   if (recordId) await base44.entities.DocumentTemplate.update(recordId, data);

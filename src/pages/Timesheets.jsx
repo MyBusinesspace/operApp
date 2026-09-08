@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogIn, Search, Clock, MapPin, CheckCircle, AlertCircle, Trash2, Square, CheckSquare, ThumbsUp, ThumbsDown, ClipboardEdit, Pencil, Camera, X } from "lucide-react";
+import { LogIn, Search, Clock, MapPin, CheckCircle, AlertCircle, Trash2, Square, CheckSquare, ThumbsUp, ThumbsDown, ClipboardEdit, Pencil, Camera, X, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/csvExport";
 import { tzTime, tzDateKey, tzDayLabel, DEFAULT_TIMEZONE } from "@/lib/timezones";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ClockInModal from "@/components/timesheets/ClockInModal";
@@ -169,6 +170,25 @@ export default function Timesheets() {
     return () => { debouncedFetch.cancel(); unsub1(); unsub2(); };
   }, [fetchEntries]);
 
+  const exportCSV = () => {
+    exportToCSV(`timesheets-${new Date().toISOString().slice(0, 10)}`, [
+      { key: "employee_name", label: "Employee" },
+      { key: "task_title", label: "Task" },
+      { key: "work_order_name", label: "Work Order" },
+      { key: "project_name", label: "Project" },
+      { key: "contact_name", label: "Client" },
+      { key: "asset_name", label: "Asset" },
+      { key: "clock_in_time", label: "Clock In" },
+      { key: "clock_out_time", label: "Clock Out" },
+      { key: r => entryDuration(r), label: "Duration (min)" },
+      { key: "status", label: "Status" },
+      { key: "on_site", label: "On Site" },
+      { key: "clock_in_address", label: "Clock In Address" },
+      { key: "clock_out_address", label: "Clock Out Address" },
+      { key: "notes", label: "Notes" },
+    ], filtered);
+  };
+
   const handleClockInSuccess = () => { fetchEntries(); setShowClockIn(false); };
   const handleSwitchSuccess = () => { fetchEntries(); setSwitchEntry(null); };
   const handleClockOutSuccess = () => fetchEntries();
@@ -296,9 +316,14 @@ export default function Timesheets() {
           <h1 className="text-2xl font-bold text-foreground">Timesheets</h1>
           <p className="text-sm text-muted-foreground">Track employee clock-in/out against tasks</p>
         </div>
-        <Button onClick={() => setShowClockIn(true)}>
-          <LogIn className="w-4 h-4 mr-2" /> Clock In
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportCSV} disabled={filtered.length === 0}>
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+          <Button onClick={() => setShowClockIn(true)}>
+            <LogIn className="w-4 h-4 mr-2" /> Clock In
+          </Button>
+        </div>
       </div>
 
       {/* Worker Map */}

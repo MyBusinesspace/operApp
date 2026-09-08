@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import {
   ClipboardList, Plus, Search, Pencil, Trash2,
   MapPin, FolderKanban, Calendar, User, Package, Square, CheckSquare,
-  Archive, ArchiveRestore
+  Archive, ArchiveRestore, Download
 } from "lucide-react";
+import { exportToCSV } from "@/lib/csvExport";
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
@@ -189,6 +190,23 @@ export default function WorkOrders() {
   const openEdit = (w) => { setEditing(w); setModal(true); };
   const openAdd  = () => { setEditing(null); setModal(true); };
 
+  const exportCSV = () => {
+    exportToCSV(`work-orders-${new Date().toISOString().slice(0, 10)}`, [
+      { key: "reference", label: "Reference" },
+      { key: "title", label: "Title" },
+      { key: "type", label: "Category" },
+      { key: "status", label: "Status" },
+      { key: "priority", label: "Priority" },
+      { key: "project_name", label: "Project" },
+      { key: "asset_name", label: "Asset" },
+      { key: "contact_name", label: "Company" },
+      { key: "location", label: "Location" },
+      { key: "assigned_to", label: "Assigned To" },
+      { key: "due_date", label: "Due Date" },
+      { key: "created_date", label: "Created Date" },
+    ], filtered);
+  };
+
   const stats = [
     { label: "Total",    value: workOrders.length,                                       color: "text-foreground" },
     { label: "Active",   value: workOrders.filter(w => w.status === "Active").length,    color: "text-emerald-600" },
@@ -210,9 +228,14 @@ export default function WorkOrders() {
             <p className="text-sm text-muted-foreground mt-0.5">Field service & work order management</p>
           </div>
         </div>
-        <Button className="gap-2 shadow-sm" onClick={openAdd}>
-          <Plus className="w-4 h-4" /> New Work Order
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={exportCSV} disabled={filtered.length === 0}>
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
+          <Button className="gap-2 shadow-sm" onClick={openAdd}>
+            <Plus className="w-4 h-4" /> New Work Order
+          </Button>
+        </div>
       </motion.div>
 
       {/* Status tab bar */}

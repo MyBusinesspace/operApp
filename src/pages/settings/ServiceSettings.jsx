@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import TaskNumberingSection from "@/components/settings/TaskNumberingSection";
+import ReferenceNumberingSection from "@/components/settings/ReferenceNumberingSection";
 
 function ColorDot({ color }) {
   return <span className="w-3 h-3 rounded-full shrink-0 inline-block" style={{ backgroundColor: color || "#6366f1" }} />;
@@ -200,77 +201,6 @@ function ItemModal({ open, onClose, onSave, item, title }) {
 
 }
 
-// ── Reusable Reference Numbering Section ──────────────────────────────────────
-function ReferenceNumberingSection({ storageKey, defaultPrefix, label }) {
-  const defaultForm = { prefix: defaultPrefix, number_padding: 4, include_year: false, next_number: 1 };
-  const [form, setForm] = useState(defaultForm);
-  const [recordId, setRecordId] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    base44.entities.DocumentTemplate.list("name", 100).then((list) => {
-      const s = list.find((t) => t.name === storageKey);
-      if (s) {
-        setRecordId(s.id);
-        try {setForm((f) => ({ ...f, ...JSON.parse(s.footer_notes || "{}") }));} catch {}
-      }
-    });
-  }, [storageKey]);
-
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const preview = () => {
-    const year = new Date().getFullYear();
-    const padded = String(form.next_number || 1).padStart(form.number_padding || 4, "0");
-    return form.include_year ? `${form.prefix}-${year}-${padded}` : `${form.prefix}-${padded}`;
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    const data = { name: storageKey, footer_notes: JSON.stringify(form) };
-    if (recordId) await base44.entities.DocumentTemplate.update(recordId, data);else
-    {const c = await base44.entities.DocumentTemplate.create(data);setRecordId(c.id);}
-    setSaving(false);setSaved(true);setTimeout(() => setSaved(false), 2000);
-  };
-
-  return (
-    <div className="bg-card border border-border rounded-xl p-4 mb-4">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
-        <Hash className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">{label} Reference Numbering</h3>
-        <span className="ml-auto text-xs text-muted-foreground">Preview: <span className="font-mono text-foreground">{preview()}</span></span>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs">Prefix</Label>
-          <Input className="h-8 text-sm" value={form.prefix || ""} onChange={(e) => set("prefix", e.target.value)} placeholder={defaultPrefix} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Number padding</Label>
-          <Input className="h-8 text-sm" type="number" min={1} max={8} value={form.number_padding || 4} onChange={(e) => set("number_padding", Number(e.target.value))} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Next number</Label>
-          <Input className="h-8 text-sm" type="number" min={1} value={form.next_number || 1} onChange={(e) => set("next_number", Number(e.target.value))} />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Include year</Label>
-          <div className="flex items-center gap-2 h-8">
-            <input type="checkbox" checked={!!form.include_year} onChange={(e) => set("include_year", e.target.checked)} className="w-4 h-4 accent-primary" />
-            <span className="text-sm text-muted-foreground">e.g. {defaultPrefix}-2026-0001</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end mt-3">
-        <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 h-7 text-xs">
-          <Save className="w-3 h-3" /> {saving ? "Saving..." : saved ? "Saved!" : "Save"}
-        </Button>
-      </div>
-    </div>);
-
-}
-
 export default function ServiceSettings() {
   const [woCategories, setWoCategories] = useState([]);
   const [woStatuses, setWoStatuses] = useState([]);
@@ -376,7 +306,7 @@ export default function ServiceSettings() {
               <ClipboardList className="w-4 h-4 text-orange-600" />
               <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Work Orders</h2>
             </div>
-            <ReferenceNumberingSection storageKey="__workorder_numbering__" defaultPrefix="WO" label="Work Order" />
+            <ReferenceNumberingSection storageKey="__wo_numbering__" defaultPrefix="WO" label="Work Order" entityName="WorkOrder" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <LabelItemList
               title="Categories"

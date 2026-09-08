@@ -15,7 +15,8 @@ import ImportFilesSection from "@/components/settings/ImportFilesSection";
 import {
   ENTITY_KNOWN_FIELDS, ENTITY_APP_FIELDS, ENTITY_REQUIRED_FIELDS, FIELD_LABELS,
   XERO_CONTACT_FIELD_MAP, XERO_COA_FIELD_MAP, XERO_INVOICE_FIELD_MAP,
-  COMMON_PROJECT_FIELD_MAP, COMMON_WORKORDER_FIELD_MAP, COMMON_EMPLOYEE_FIELD_MAP, COMMON_ASSET_FIELD_MAP,
+  COMMON_PROJECT_FIELD_MAP, COMMON_WORKORDER_FIELD_MAP, COMMON_TASK_FIELD_MAP, COMMON_TIMEENTRY_FIELD_MAP,
+  COMMON_EMPLOYEE_FIELD_MAP, COMMON_ASSET_FIELD_MAP,
   XERO_BANK_ACCOUNT_FIELD_MAP, XERO_BANK_TRANSACTION_FIELD_MAP, NUMERIC_FIELDS,
 } from "@/lib/importCenterConfig";
 
@@ -85,6 +86,15 @@ const ENTITIES = [
     color: "bg-rose-50 text-rose-600",
     templateHeaders: ["title", "status", "category", "work_order_name", "project_name", "contact_name", "planning_date", "planning_time_in", "planning_time_out", "priority", "notes"],
     templateSample: ["Inspect hoist mechanism", "Queued", "Inspection", "Monthly Maintenance WO", "Tower Crane Rental", "Acme Corp", "2026-06-15", "08:00", "12:00", "High", ""],
+  },
+  {
+    key: "TimeEntry",
+    label: "Timesheets",
+    icon: ClipboardList,
+    desc: "Time entries & timesheet records",
+    color: "bg-rose-50 text-rose-600",
+    templateHeaders: ["EmployeeName", "TaskTitle", "WorkOrderName", "ProjectName", "ContactName", "ClockInTime", "ClockOutTime", "DurationMinutes", "Notes"],
+    templateSample: ["John Smith", "Inspect hoist mechanism", "Monthly Maintenance WO", "Tower Crane Rental", "Acme Corp", "2026-06-15 08:00", "2026-06-15 12:00", "240", "Routine inspection completed"],
   },
   {
     key: "Employee",
@@ -182,6 +192,8 @@ const resolveField = (entityKey, h, overrides, knownFields) => {
   if ((entityKey === "Invoice" || entityKey === "Bill") && XERO_INVOICE_FIELD_MAP[h] !== undefined) return XERO_INVOICE_FIELD_MAP[h];
   if (entityKey === "Project" && COMMON_PROJECT_FIELD_MAP[h] !== undefined) return COMMON_PROJECT_FIELD_MAP[h];
   if (entityKey === "WorkOrder" && COMMON_WORKORDER_FIELD_MAP[h] !== undefined) return COMMON_WORKORDER_FIELD_MAP[h];
+  if (entityKey === "Task" && COMMON_TASK_FIELD_MAP[h] !== undefined) return COMMON_TASK_FIELD_MAP[h];
+  if (entityKey === "TimeEntry" && COMMON_TIMEENTRY_FIELD_MAP[h] !== undefined) return COMMON_TIMEENTRY_FIELD_MAP[h];
   if (entityKey === "Employee" && COMMON_EMPLOYEE_FIELD_MAP[h] !== undefined) return COMMON_EMPLOYEE_FIELD_MAP[h];
   if (entityKey === "Asset" && COMMON_ASSET_FIELD_MAP[h] !== undefined) return COMMON_ASSET_FIELD_MAP[h];
   if (entityKey === "BankAccount" && XERO_BANK_ACCOUNT_FIELD_MAP[h] !== undefined) return XERO_BANK_ACCOUNT_FIELD_MAP[h];
@@ -417,6 +429,8 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
     if ((entity.key === "Invoice" || entity.key === "Bill") && XERO_INVOICE_FIELD_MAP[h] !== undefined) return XERO_INVOICE_FIELD_MAP[h];
     if (entity.key === "Project" && COMMON_PROJECT_FIELD_MAP[h] !== undefined) return COMMON_PROJECT_FIELD_MAP[h];
     if (entity.key === "WorkOrder" && COMMON_WORKORDER_FIELD_MAP[h] !== undefined) return COMMON_WORKORDER_FIELD_MAP[h];
+    if (entity.key === "Task" && COMMON_TASK_FIELD_MAP[h] !== undefined) return COMMON_TASK_FIELD_MAP[h];
+    if (entity.key === "TimeEntry" && COMMON_TIMEENTRY_FIELD_MAP[h] !== undefined) return COMMON_TIMEENTRY_FIELD_MAP[h];
     if (entity.key === "Employee" && COMMON_EMPLOYEE_FIELD_MAP[h] !== undefined) return COMMON_EMPLOYEE_FIELD_MAP[h];
     if (entity.key === "Asset" && COMMON_ASSET_FIELD_MAP[h] !== undefined) return COMMON_ASSET_FIELD_MAP[h];
     if (entity.key === "BankAccount" && XERO_BANK_ACCOUNT_FIELD_MAP[h] !== undefined) return XERO_BANK_ACCOUNT_FIELD_MAP[h];
@@ -498,6 +512,28 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
           });
         } catch {}
       }
+      // Pre-load employees for name→id lookup (used by TimeEntry)
+      let employeesByName = {};
+      if (entity.key === "TimeEntry") {
+        try {
+          const allEmployees = await base44.entities.Employee.list("-created_date", 100000);
+          allEmployees.forEach(e => {
+            const key = (e.full_name || "").trim().toLowerCase();
+            if (key) employeesByName[key] = e;
+          });
+        } catch {}
+      }
+      // Pre-load tasks for title→id lookup (used by TimeEntry)
+      let tasksByTitle = {};
+      if (entity.key === "TimeEntry") {
+        try {
+          const allTasks = await base44.entities.Task.list("-created_date", 100000);
+          allTasks.forEach(t => {
+            const key = (t.title || "").trim().toLowerCase();
+            if (key) tasksByTitle[key] = t;
+          });
+        } catch {}
+      }
 
       // Helper: find or create a contact by name, returns { id, full_name }
       const resolveContact = async (name) => {
@@ -524,11 +560,13 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
             || ((entity.key === "Invoice" || entity.key === "Bill") && XERO_INVOICE_FIELD_MAP[h] !== undefined ? XERO_INVOICE_FIELD_MAP[h] : undefined)
             || (entity.key === "Project" && COMMON_PROJECT_FIELD_MAP[h] !== undefined ? COMMON_PROJECT_FIELD_MAP[h] : undefined)
             || (entity.key === "WorkOrder" && COMMON_WORKORDER_FIELD_MAP[h] !== undefined ? COMMON_WORKORDER_FIELD_MAP[h] : undefined)
+            || (entity.key === "Task" && COMMON_TASK_FIELD_MAP[h] !== undefined ? COMMON_TASK_FIELD_MAP[h] : undefined)
+            || (entity.key === "TimeEntry" && COMMON_TIMEENTRY_FIELD_MAP[h] !== undefined ? COMMON_TIMEENTRY_FIELD_MAP[h] : undefined)
             || (entity.key === "Employee" && COMMON_EMPLOYEE_FIELD_MAP[h] !== undefined ? COMMON_EMPLOYEE_FIELD_MAP[h] : undefined)
             || (entity.key === "Asset" && COMMON_ASSET_FIELD_MAP[h] !== undefined ? COMMON_ASSET_FIELD_MAP[h] : undefined)
             || (entity.key === "BankAccount" && XERO_BANK_ACCOUNT_FIELD_MAP[h] !== undefined ? XERO_BANK_ACCOUNT_FIELD_MAP[h] : undefined)
             || (entity.key === "BankTransaction" && XERO_BANK_TRANSACTION_FIELD_MAP[h] !== undefined ? XERO_BANK_TRANSACTION_FIELD_MAP[h] : undefined)
-            || h;
+            || null;
           if (fieldName === null || fieldName === undefined) return;
           if (isLockedField(fieldName)) return;
           if (val === undefined || val === "") return;
@@ -620,8 +658,8 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
 
       let imported = 0, failed = [];
 
-      // Projects, WorkOrders, BankAccounts & BankTransactions: one-by-one to resolve links
-      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "BankAccount" || entity.key === "BankTransaction") {
+      // Projects, WorkOrders, BankAccounts, BankTransactions & TimeEntries: one-by-one to resolve links
+      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "BankAccount" || entity.key === "BankTransaction" || entity.key === "TimeEntry") {
         for (let i = 0; i < rows.length; i++) {
           const record = buildRecord(rows[i]);
           if (!passesRequired(record)) { setProgress(Math.round(((i + 1) / rows.length) * 100)); continue; }
@@ -640,6 +678,24 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
           if (entity.key === "WorkOrder" && record.project_name) {
             const proj = projectsByName[record.project_name.trim().toLowerCase()];
             if (proj) { record.project_id = proj.id; record.project_name = proj.name; }
+          }
+          // TimeEntry: resolve employee by name (required)
+          if (entity.key === "TimeEntry" && record.employee_name) {
+            const emp = employeesByName[record.employee_name.trim().toLowerCase()];
+            if (emp) { record.employee_id = emp.id; record.employee_name = emp.full_name; }
+            else { failed.push(`Row ${i + 1}: Employee "${record.employee_name}" not found`); setProgress(Math.round(((i + 1) / rows.length) * 100)); continue; }
+          }
+          // TimeEntry: resolve task by title (required)
+          if (entity.key === "TimeEntry" && record.task_title) {
+            const task = tasksByTitle[record.task_title.trim().toLowerCase()];
+            if (task) {
+              record.task_id = task.id;
+              record.task_title = task.title;
+              if (!record.work_order_name && task.work_order_name) record.work_order_name = task.work_order_name;
+              if (!record.project_name && task.project_name) record.project_name = task.project_name;
+              if (!record.contact_name && task.contact_name) record.contact_name = task.contact_name;
+              if (!record.asset_name && task.asset_name) record.asset_name = task.asset_name;
+            } else { failed.push(`Row ${i + 1}: Task "${record.task_title}" not found`); setProgress(Math.round(((i + 1) / rows.length) * 100)); continue; }
           }
           // Resolve contact by name
           if (record.contact_name) {
@@ -683,7 +739,7 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
   const NAV_PATHS = {
     ChartOfAccount: "accounting/chart-of-accounts",
     Contact: "contacts", Invoice: "sales/invoices", Bill: "purchasing/bills",
-    Project: "projects", WorkOrder: "work-orders", Task: "tasks", Employee: "employees", Asset: "assets",
+    Project: "projects", WorkOrder: "work-orders", Task: "tasks", TimeEntry: "timesheets", Employee: "employees", Asset: "assets",
     BankAccount: "accounting/banks", BankTransaction: "accounting/banks",
   };
 

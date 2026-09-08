@@ -8,6 +8,7 @@ import {
   stampUpdate,
   rowMatchesFilter,
 } from "../query.js";
+import { coerceRow } from "../coerce.js";
 
 async function currentUserLite() {
   try {
@@ -26,6 +27,8 @@ async function currentUserLite() {
 
 function throwIfError(error, fallbackMessage) {
   if (!error) return;
+  // Page code rarely catches these; log so failures are visible instead of silent.
+  console.error(`[compat] ${fallbackMessage}:`, error.message || error, error.details || "");
   throw toBase44Error(
     {
       message: error.message || fallbackMessage,
@@ -89,7 +92,7 @@ function createEntityHandler(entityName) {
     async create(payload) {
       const supabase = getSupabase();
       const user = await currentUserLite();
-      const row = stampCreate(payload || {}, user);
+      const row = coerceRow(entityName, stampCreate(payload || {}, user));
       const { data, error } = await supabase.from(table).insert(row).select("*").single();
       throwIfError(error, `Failed to create ${entityName}`);
       return data;
@@ -97,7 +100,7 @@ function createEntityHandler(entityName) {
 
     async update(id, payload) {
       const supabase = getSupabase();
-      const row = stampUpdate(unwrapUpdatePayload(payload || {}));
+      const row = coerceRow(entityName, stampUpdate(unwrapUpdatePayload(payload || {})));
       const { data, error } = await supabase
         .from(table)
         .update(row)
@@ -118,7 +121,7 @@ function createEntityHandler(entityName) {
     async bulkCreate(items = []) {
       const supabase = getSupabase();
       const user = await currentUserLite();
-      const rows = (items || []).map((item) => stampCreate(item, user));
+      const rows = (items || []).map((item) => coerceRow(entityName, stampCreate(item, user)));
       const { data, error } = await supabase.from(table).insert(rows).select("*");
       throwIfError(error, `Failed to bulkCreate ${entityName}`);
       return data || [];
@@ -136,7 +139,7 @@ function createEntityHandler(entityName) {
 
     async updateMany(filterQuery = {}, updatePayload = {}) {
       const supabase = getSupabase();
-      const patch = stampUpdate(unwrapUpdatePayload(updatePayload));
+      const patch = coerceRow(entityName, stampUpdate(unwrapUpdatePayload(updatePayload)));
 
       // Prefer server-side update when filter is simple equality-only.
       const keys = Object.keys(filterQuery || {}).filter((k) => !k.startsWith("$"));
