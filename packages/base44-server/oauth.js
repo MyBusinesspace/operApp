@@ -14,7 +14,8 @@ import { appOrigin, env, supabaseConfig } from "./env.js";
 
 const VERIFIER_COOKIE = "operapp_pkce";
 const RETURN_COOKIE = "operapp_oauth_return";
-const COOKIE_TTL_SECONDS = 600;
+// Generous, because Google may interrupt with a passkey or 2FA challenge.
+const COOKIE_TTL_SECONDS = 1800;
 
 function base64Url(buffer) {
   return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
