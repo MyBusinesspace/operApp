@@ -5,9 +5,19 @@
  * as a fallback so a single local .env file drives both the web app and the API.
  */
 
+/** Values copied straight from vercel.env.example, e.g. PASTE_ANON_PUBLIC_KEY_HERE. */
+function isPlaceholder(value) {
+  return /^PASTE_|_HERE$/.test(value);
+}
+
 export function env(name, fallback = "") {
   const value = process.env[name];
-  return value === undefined || value === null || value === "" ? fallback : value;
+  if (value === undefined || value === null || value === "") return fallback;
+  if (isPlaceholder(value)) {
+    console.warn(`[env] Ignoring placeholder value for ${name}`);
+    return fallback;
+  }
+  return value;
 }
 
 export function supabaseConfig() {

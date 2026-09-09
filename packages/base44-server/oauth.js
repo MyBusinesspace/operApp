@@ -91,7 +91,10 @@ async function exchangeCode(code, verifier) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data?.access_token) {
-    throw new Error(data?.error_description || data?.msg || "Token exchange failed.");
+    // GoTrue reports errors as error_description, msg or message depending on the case.
+    const reason =
+      data?.error_description || data?.msg || data?.message || `HTTP ${response.status}`;
+    throw new Error(`Token exchange failed: ${reason}`);
   }
   return data.access_token;
 }
