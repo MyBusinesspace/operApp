@@ -24,8 +24,20 @@ function requestOrigin(req) {
   return `${String(proto).split(",")[0]}://${String(host).split(",")[0]}`;
 }
 
+/**
+ * Non-Next projects have no catch-all routes, so vercel.json rewrites every
+ * /api/* request to /api/index and carries the real path in `__path`.
+ */
+function restoreRewrittenPath(url) {
+  const forwarded = url.searchParams.get("__path");
+  if (!forwarded) return;
+  url.searchParams.delete("__path");
+  url.pathname = `/api/${forwarded.replace(/^\/+/, "")}`;
+}
+
 export async function toWebRequest(req) {
   const url = new URL(req.url, requestOrigin(req));
+  restoreRewrittenPath(url);
   const headers = new Headers();
   for (const [key, value] of Object.entries(req.headers || {})) {
     if (Array.isArray(value)) value.forEach((item) => headers.append(key, item));

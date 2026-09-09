@@ -4,5 +4,8 @@
       "includeFiles": "packages/base44-server/generated/**"
     }
   },
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index?__path=:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }
