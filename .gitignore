@@ -35,6 +35,13 @@ dist-ssr
 .vite
 base44/.app.jsonc
 
+# Local archives / scratch files
+*.rar
+*.zip
+
+# Compiled Base44 backend functions (rebuilt by: npm run api:build)
+packages/base44-server/generated/
+
 # Local infra secrets
 supabase/.env
 supabase/.temp/

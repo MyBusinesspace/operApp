@@ -1,42 +1,67 @@
-**Welcome to your Base44 project** 
+# OperApp — Base44 app on Supabase + Vercel
 
-**About**
+The app is still authored in Base44, but it runs on our own stack: Supabase for the
+database, auth and storage, Vercel for the frontend and the backend API.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+Nothing under `base44/**` or `src/**` is modified. Base44's SDK is redirected to a
+compatibility layer at build time:
 
-This project contains everything you need to run your app locally.
+| Surface | Base44 import | Redirected by | To |
+| --- | --- | --- | --- |
+| Browser | `@base44/sdk` | `vite.config.js` alias | `packages/base44-compat` |
+| Backend functions | `npm:@base44/sdk` | `scripts/build-api-functions.mjs` | `packages/base44-server` |
 
-**Edit the code in your local development environment**
+## Local development
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
-
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+```bash
+npm install
+npm run local          # supabase start + env sync + vite
+npm run api:dev        # Base44-compatible API on http://localhost:3000
 ```
 
-Run the app: `npm run dev`
+## After pulling a new Base44 export
 
-**Publish your changes**
+```bash
+npm run schema:generate   # base44/entities → supabase/migrations + column types
+npm run api:build         # base44/functions → packages/base44-server/generated
+```
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+Apply the regenerated migration to Supabase if entity fields changed.
 
-**Docs & Support**
+## API served by Vercel
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+One serverless function (`api/[...path].js`) answers the same URLs the Base44
+platform did, so existing clients only need a different host:
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+```
+GET    /api/apps/:appId/entities/:Entity?q=&sort=&limit=&skip=&fields=
+GET    /api/apps/:appId/entities/:Entity/:id
+GET    /api/apps/:appId/entities/User/me
+POST   /api/apps/:appId/entities/:Entity
+PUT    /api/apps/:appId/entities/:Entity/:id
+DELETE /api/apps/:appId/entities/:Entity/:id
+ANY    /api/apps/:appId/functions/:name      (apiAuth, apiTimesheet, …)
+GET    /api/apps/auth/login | /api/apps/auth/callback
+```
 
+## Mobile app
 
-Zv8OBSh0CBvOH9CV
+`operapp360/mobile` switches backends with one build flag — no code changes:
+
+```bash
+flutter run                                  # Base44
+flutter run --dart-define=BACKEND=vercel     # this deployment
+```
+
+## Environment variables
+
+Import `vercel.env` into Vercel (Config type, not Secret). The API needs the
+server-side values: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `API_KEY`,
+`OTP_SECRET`, and `RESEND_API_KEY` + `EMAIL_FROM` for OTP sign-in emails.
+
+In Supabase → Authentication → URL Configuration, allow the OAuth callback:
+`https://<your-domain>/api/apps/auth/callback`.
+
+## Base44
+
+Documentation: <https://docs.base44.com/Integrations/Using-GitHub>

@@ -7,16 +7,26 @@
 #   src/lib/**          (including AuthContext.jsx)
 #   src/App.jsx
 #   src/api/base44Client.js
-#   base44/**
+#   base44/entities/**      (then run: npm run schema:generate)
+#   base44/functions/**     (then run: npm run api:build)
+#   base44/shared/**        (then run: npm run api:build)
 #
 # You MUST KEEP (never overwrite from Base44 export):
-#   packages/base44-compat/**
-#   vite.config.js          (@base44/sdk → packages/base44-compat)
+#   packages/base44-compat/**   (browser SDK → Supabase)
+#   packages/base44-server/**   (backend SDK → Supabase, used by the API)
+#   api/**                      (Vercel entry point for the Base44-shaped API)
+#   vite.config.js              (@base44/sdk → packages/base44-compat)
+#   vercel.json / vercel.env
 #   supabase/**
 #   scripts/**
 #   .env.local / supabase/.env
-#   package.json scripts (db:*, env:sync, auth:google, schema:generate)
+#   package.json scripts (build, api:*, db:*, env:sync, auth:google, schema:generate)
 #
 # All behavior changes (auth, Google, admin bootstrap, storage, entities)
-# live ONLY under packages/base44-compat so Base44 page replacements
-# keep working via the Vite alias.
+# live ONLY under packages/* so Base44 replacements keep working:
+#   - the browser gets the compat SDK through the Vite alias
+#   - the backend functions get it through scripts/build-api-functions.mjs,
+#     which rewrites `npm:@base44/sdk` while compiling base44/functions/**
+#
+# Nothing under base44/** is ever edited by this bridge — replace those files
+# freely, then re-run:  npm run schema:generate && npm run api:build
