@@ -4,8 +4,9 @@
 !.env.example
 !supabase/.env.example
 
-# Vercel import template (placeholders only — safe to commit)
-!vercel.env
+# Vercel variables: keep the real values local, commit only the template
+vercel.env
+!vercel.env.example
 
 # Logs
 /logs

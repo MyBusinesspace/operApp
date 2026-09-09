@@ -55,7 +55,8 @@ flutter run --dart-define=BACKEND=vercel     # this deployment
 
 ## Environment variables
 
-Import `vercel.env` into Vercel (Config type, not Secret). The API needs the
+Copy `vercel.env.example` to `vercel.env`, fill in the real values (that file is
+git-ignored) and import it into Vercel as Config type, not Secret. The API needs the
 server-side values: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `API_KEY`,
 `OTP_SECRET`, and `RESEND_API_KEY` + `EMAIL_FROM` for OTP sign-in emails.
 
