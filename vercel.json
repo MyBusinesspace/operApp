@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/[...path].js": {
+    "api/*.js": {
       "includeFiles": "packages/base44-server/generated/**",
       "maxDuration": 60
     }
