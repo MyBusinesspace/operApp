@@ -140,6 +140,8 @@ export async function routeApiRequest(request) {
   if (kind === "functions") {
     const name = rest[0];
     if (!name) return jsonResponse({ error: "Missing function name" }, 404);
+    // Action only — the query string can carry access tokens.
+    console.log("[api] function", name, url.searchParams.get("action") || "");
     const handler = await getFunctionHandler(name);
     if (!handler) {
       handlerCache.delete(name);

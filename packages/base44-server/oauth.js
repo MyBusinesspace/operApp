@@ -77,6 +77,7 @@ function startLogin(request) {
   const headers = new Headers({ Location: authorize.toString() });
   headers.append("Set-Cookie", cookie(VERIFIER_COOKIE, verifier, COOKIE_TTL_SECONDS));
   headers.append("Set-Cookie", cookie(RETURN_COOKIE, fromUrl, COOKIE_TTL_SECONDS));
+  console.log("[oauth] start", { callback, fromUrl });
   return new Response(null, { status: 302, headers });
 }
 
@@ -99,11 +100,20 @@ async function finishLogin(request) {
   const url = new URL(request.url);
   const returnUrl = readCookie(request, RETURN_COOKIE);
   const oauthError = url.searchParams.get("error_description") || url.searchParams.get("error");
+  const code = url.searchParams.get("code");
+
+  // The mobile flow is invisible from the client side, so leave a trail here.
+  console.log("[oauth] callback", {
+    hasCode: Boolean(code),
+    hasReturnCookie: Boolean(returnUrl),
+    hasVerifierCookie: Boolean(readCookie(request, VERIFIER_COOKIE)),
+    params: [...url.searchParams.keys()],
+    oauthError: oauthError || null,
+  });
 
   if (!returnUrl) return errorPage("Sign-in session expired. Start again from the app.");
   if (oauthError) return redirectWithToken(returnUrl, { error: oauthError });
 
-  const code = url.searchParams.get("code");
   if (!code) {
     // Implicit grant puts the token in the fragment, which never reaches the
     // server — bounce it back through the browser.
@@ -124,8 +134,10 @@ async function finishLogin(request) {
 
   try {
     const accessToken = await exchangeCode(code, verifier);
+    console.log("[oauth] exchanged", { tokenLength: accessToken.length });
     return redirectWithToken(returnUrl, { access_token: accessToken });
   } catch (error) {
+    console.error("[oauth] exchange failed", error.message);
     return redirectWithToken(returnUrl, { error: error.message });
   }
 }
