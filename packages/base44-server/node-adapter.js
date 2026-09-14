@@ -27,11 +27,17 @@ function requestOrigin(req) {
 /**
  * Non-Next projects have no catch-all routes, so vercel.json rewrites every
  * /api/* request to /api/index and carries the real path in `__path`.
+ *
+ * The rewrite capture MUST NOT be named `:path*` — Vercel also injects that
+ * name as a query param and would overwrite Base44 function params such as
+ * `?path=profile` on apiEmployeeProfile.
  */
 function restoreRewrittenPath(url) {
   const forwarded = url.searchParams.get("__path");
   if (!forwarded) return;
   url.searchParams.delete("__path");
+  // Drop the named-group echo (`rest`) if Vercel appended it.
+  url.searchParams.delete("rest");
   url.pathname = `/api/${forwarded.replace(/^\/+/, "")}`;
 }
 
