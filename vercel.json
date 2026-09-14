@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/*.js": {
-      "includeFiles": "packages/base44-server/generated/**"
+      "includeFiles": "packages/base44-server/generated/**",
+      "maxDuration": 60
     }
   },
   "rewrites": [

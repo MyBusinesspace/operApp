@@ -23,6 +23,29 @@ function fail(error, message) {
   throw err;
 }
 
+function isTransientDbError(error) {
+  const text = `${error?.message || ""} ${error?.details || ""} ${error?.code || ""}`.toLowerCase();
+  return /timeout|timed out|gateway|fetch failed|econnreset|econnrefused|socket|503|502|504|520|522|524|429/.test(
+    text
+  );
+}
+
+async function withDbRetry(label, run, attempts = 3) {
+  let lastError;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      lastError = error;
+      if (!isTransientDbError(error) || i === attempts - 1) throw error;
+      const waitMs = 250 * 2 ** i;
+      console.warn(`[db] ${label} transient failure (attempt ${i + 1}/${attempts}):`, error.message || error);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+  }
+  throw lastError;
+}
+
 function createEntityHandler(client, entityName, user) {
   const table = entityToTable(entityName);
   const select = (fields) => (fields?.length ? fields.join(",") : "*");
@@ -31,67 +54,79 @@ function createEntityHandler(client, entityName, user) {
 
   return {
     async list(sort, limit = 100, skip = 0, fields) {
-      let query = client.from(table).select(select(fields));
-      query = applySort(query, sort);
-      if (skip) query = query.range(skip, skip + limit - 1);
-      else query = query.limit(limit);
-      const { data, error } = await query;
-      fail(error, `Failed to list ${entityName}`);
-      return data || [];
+      return withDbRetry(`list ${entityName}`, async () => {
+        let query = client.from(table).select(select(fields));
+        query = applySort(query, sort);
+        if (skip) query = query.range(skip, skip + limit - 1);
+        else query = query.limit(limit);
+        const { data, error } = await query;
+        fail(error, `Failed to list ${entityName}`);
+        return data || [];
+      });
     },
 
     async filter(filterQuery = {}, sort, limit = 100, skip = 0, fields) {
-      let query = client.from(table).select(select(fields));
-      const applied = applyEntityFilter(query, filterQuery);
-      query = applySort(applied.query, sort);
+      return withDbRetry(`filter ${entityName}`, async () => {
+        let query = client.from(table).select(select(fields));
+        const applied = applyEntityFilter(query, filterQuery);
+        query = applySort(applied.query, sort);
 
-      const fetchLimit = applied.postFilter ? Math.max(limit * 5, 500) : limit;
-      if (skip && !applied.postFilter) query = query.range(skip, skip + limit - 1);
-      else query = query.limit(fetchLimit);
+        const fetchLimit = applied.postFilter ? Math.max(limit * 5, 500) : limit;
+        if (skip && !applied.postFilter) query = query.range(skip, skip + limit - 1);
+        else query = query.limit(fetchLimit);
 
-      const { data, error } = await query;
-      fail(error, `Failed to filter ${entityName}`);
-      let rows = data || [];
-      if (applied.postFilter) {
-        rows = applied.postFilter(rows).slice(skip || 0, (skip || 0) + limit);
-      }
-      return rows;
+        const { data, error } = await query;
+        fail(error, `Failed to filter ${entityName}`);
+        let rows = data || [];
+        if (applied.postFilter) {
+          rows = applied.postFilter(rows).slice(skip || 0, (skip || 0) + limit);
+        }
+        return rows;
+      });
     },
 
     async get(id) {
-      const { data, error } = await client.from(table).select("*").eq("id", id).maybeSingle();
-      fail(error, `Failed to get ${entityName}`);
-      if (!data) {
-        const err = new Error(`${entityName} not found: ${id}`);
-        err.status = 404;
-        throw err;
-      }
-      return data;
+      return withDbRetry(`get ${entityName}`, async () => {
+        const { data, error } = await client.from(table).select("*").eq("id", id).maybeSingle();
+        fail(error, `Failed to get ${entityName}`);
+        if (!data) {
+          const err = new Error(`${entityName} not found: ${id}`);
+          err.status = 404;
+          throw err;
+        }
+        return data;
+      });
     },
 
     async create(payload) {
-      const row = coerceRow(entityName, stampCreate(payload || {}, caller()));
-      const { data, error } = await client.from(table).insert(row).select("*").single();
-      fail(error, `Failed to create ${entityName}`);
-      return data;
+      return withDbRetry(`create ${entityName}`, async () => {
+        const row = coerceRow(entityName, stampCreate(payload || {}, caller()));
+        const { data, error } = await client.from(table).insert(row).select("*").single();
+        fail(error, `Failed to create ${entityName}`);
+        return data;
+      });
     },
 
     async update(id, payload) {
-      const row = coerceRow(entityName, stampUpdate(unwrapUpdatePayload(payload || {})));
-      const { data, error } = await client
-        .from(table)
-        .update(row)
-        .eq("id", id)
-        .select("*")
-        .single();
-      fail(error, `Failed to update ${entityName}`);
-      return data;
+      return withDbRetry(`update ${entityName}`, async () => {
+        const row = coerceRow(entityName, stampUpdate(unwrapUpdatePayload(payload || {})));
+        const { data, error } = await client
+          .from(table)
+          .update(row)
+          .eq("id", id)
+          .select("*")
+          .single();
+        fail(error, `Failed to update ${entityName}`);
+        return data;
+      });
     },
 
     async delete(id) {
-      const { error } = await client.from(table).delete().eq("id", id);
-      fail(error, `Failed to delete ${entityName}`);
-      return { success: true };
+      return withDbRetry(`delete ${entityName}`, async () => {
+        const { error } = await client.from(table).delete().eq("id", id);
+        fail(error, `Failed to delete ${entityName}`);
+        return { success: true };
+      });
     },
 
     async bulkCreate(items = []) {

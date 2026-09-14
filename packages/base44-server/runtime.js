@@ -54,6 +54,17 @@ function installFetchShim() {
   if (globalThis.fetch?.__operappShim) return;
   const originalFetch = globalThis.fetch.bind(globalThis);
 
+  async function fetchWithTimeout(input, init, timeoutMs) {
+    if (init?.signal) return originalFetch(input, init);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await originalFetch(input, { ...(init || {}), signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   const patched = async (input, init) => {
     const request = input instanceof Request && !init ? input : new Request(input, init);
     let url;
@@ -61,6 +72,18 @@ function installFetchShim() {
       url = new URL(request.url);
     } catch {
       return originalFetch(input, init);
+    }
+
+    // Keep Nominatim from hanging the whole clock-out if OSM is slow.
+    if (url.hostname.includes("nominatim.openstreetmap.org")) {
+      try {
+        return await fetchWithTimeout(request, undefined, 5000);
+      } catch {
+        return new Response(JSON.stringify({ error: "geocode timeout" }), {
+          status: 504,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     if (!BASE44_HOST_PATTERN.test(url.hostname) || env("BASE44_PASSTHROUGH") === "1") {
