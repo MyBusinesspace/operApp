@@ -12,6 +12,7 @@ import {
   unwrapUpdatePayload,
 } from "../base44-compat/query.js";
 import { coerceRow } from "../base44-compat/coerce.js";
+import { fetchInChunks, CHUNK_THRESHOLD, PAGE_CHUNK } from "../base44-compat/page-fetch.js";
 import { entityToTable } from "./supabase.js";
 
 function fail(error, message) {
@@ -55,11 +56,23 @@ function createEntityHandler(client, entityName, user) {
   return {
     async list(sort, limit = 100, skip = 0, fields) {
       return withDbRetry(`list ${entityName}`, async () => {
-        let query = client.from(table).select(select(fields));
+        const cols = select(fields);
+        const runRange = async (from, to) => {
+          let query = client.from(table).select(cols);
+          query = applySort(query, sort);
+          const { data, error } = await query.range(from, to);
+          fail(error, `Failed to list ${entityName}`);
+          return data || [];
+        };
+
+        if ((Number(limit) || 0) > CHUNK_THRESHOLD) {
+          return fetchInChunks(runRange, { skip, limit, chunkSize: PAGE_CHUNK });
+        }
+        if (skip) return runRange(skip, skip + limit - 1);
+
+        let query = client.from(table).select(cols);
         query = applySort(query, sort);
-        if (skip) query = query.range(skip, skip + limit - 1);
-        else query = query.limit(limit);
-        const { data, error } = await query;
+        const { data, error } = await query.limit(limit);
         fail(error, `Failed to list ${entityName}`);
         return data || [];
       });
@@ -67,21 +80,36 @@ function createEntityHandler(client, entityName, user) {
 
     async filter(filterQuery = {}, sort, limit = 100, skip = 0, fields) {
       return withDbRetry(`filter ${entityName}`, async () => {
-        let query = client.from(table).select(select(fields));
-        const applied = applyEntityFilter(query, filterQuery);
-        query = applySort(applied.query, sort);
+        const cols = select(fields);
+        const build = () => applyEntityFilter(client.from(table).select(cols), filterQuery);
 
-        const fetchLimit = applied.postFilter ? Math.max(limit * 5, 500) : limit;
-        if (skip && !applied.postFilter) query = query.range(skip, skip + limit - 1);
-        else query = query.limit(fetchLimit);
+        const probe = build();
+        if (probe.postFilter) {
+          const fetchLimit = Math.max(limit * 5, 500);
+          let query = applySort(probe.query, sort).limit(fetchLimit);
+          const { data, error } = await query;
+          fail(error, `Failed to filter ${entityName}`);
+          return probe.postFilter(data || []).slice(skip || 0, (skip || 0) + limit);
+        }
 
+        const runRange = async (from, to) => {
+          const applied = build();
+          let query = applySort(applied.query, sort);
+          const { data, error } = await query.range(from, to);
+          fail(error, `Failed to filter ${entityName}`);
+          return data || [];
+        };
+
+        if ((Number(limit) || 0) > CHUNK_THRESHOLD) {
+          return fetchInChunks(runRange, { skip, limit, chunkSize: PAGE_CHUNK });
+        }
+        if (skip) return runRange(skip, skip + limit - 1);
+
+        const applied = build();
+        let query = applySort(applied.query, sort).limit(limit);
         const { data, error } = await query;
         fail(error, `Failed to filter ${entityName}`);
-        let rows = data || [];
-        if (applied.postFilter) {
-          rows = applied.postFilter(rows).slice(skip || 0, (skip || 0) + limit);
-        }
-        return rows;
+        return data || [];
       });
     },
 

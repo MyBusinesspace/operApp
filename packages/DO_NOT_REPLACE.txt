@@ -15,6 +15,9 @@
 #   packages/base44-compat/**   (browser SDK → Supabase)
 #   packages/base44-server/**   (backend SDK → Supabase, used by the API)
 #   api/**                      (Vercel entry point for the Base44-shaped API)
+#
+# Mobile paging on Vercel (entityQuery + get_entries?skip=) is documented in:
+#   packages/base44-server/MOBILE_PAGINATION.md
 #   vite.config.js              (@base44/sdk → packages/base44-compat)
 #   vercel.json / vercel.env
 #   supabase/**

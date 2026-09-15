@@ -9,6 +9,7 @@ import {
   rowMatchesFilter,
 } from "../query.js";
 import { coerceRow } from "../coerce.js";
+import { fetchInChunks, CHUNK_THRESHOLD, PAGE_CHUNK } from "../page-fetch.js";
 
 async function currentUserLite() {
   try {
@@ -46,34 +47,70 @@ function createEntityHandler(entityName) {
   return {
     async list(sort, limit = 100, skip = 0, fields) {
       const supabase = getSupabase();
-      let query = supabase.from(table).select(fields?.length ? fields.join(",") : "*");
+      const cols = fields?.length ? fields.join(",") : "*";
+      const runRange = async (from, to) => {
+        let query = supabase.from(table).select(cols);
+        query = applySort(query, sort);
+        const { data, error } = await query.range(from, to);
+        throwIfError(error, `Failed to list ${entityName}`);
+        return data || [];
+      };
+
+      if ((Number(limit) || 0) > CHUNK_THRESHOLD) {
+        return fetchInChunks(runRange, { skip, limit, chunkSize: PAGE_CHUNK });
+      }
+
+      if (skip) {
+        const { data, error } = await runRange(skip, skip + limit - 1);
+        throwIfError(error, `Failed to list ${entityName}`);
+        return data;
+      }
+
+      let query = supabase.from(table).select(cols);
       query = applySort(query, sort);
-      if (skip) query = query.range(skip, skip + limit - 1);
-      else query = query.limit(limit);
-      const { data, error } = await query;
+      const { data, error } = await query.limit(limit);
       throwIfError(error, `Failed to list ${entityName}`);
       return data || [];
     },
 
     async filter(filterQuery = {}, sort, limit = 100, skip = 0, fields) {
       const supabase = getSupabase();
-      let query = supabase.from(table).select(fields?.length ? fields.join(",") : "*");
-      const applied = applyEntityFilter(query, filterQuery);
-      query = applySort(applied.query, sort);
+      const cols = fields?.length ? fields.join(",") : "*";
 
-      // When client-side post-filter is needed, fetch a wider page then filter.
-      const fetchLimit = applied.postFilter ? Math.max(limit * 5, 500) : limit;
-      if (skip && !applied.postFilter) query = query.range(skip, skip + limit - 1);
-      else query = query.limit(fetchLimit);
+      const build = () => {
+        let query = supabase.from(table).select(cols);
+        return applyEntityFilter(query, filterQuery);
+      };
 
+      const appliedProbe = build();
+      if (appliedProbe.postFilter) {
+        // Complex filters still need a wider fetch then client-side trim.
+        const fetchLimit = Math.max(limit * 5, 500);
+        let query = applySort(appliedProbe.query, sort).limit(fetchLimit);
+        const { data, error } = await query;
+        throwIfError(error, `Failed to filter ${entityName}`);
+        return appliedProbe.postFilter(data || []).slice(skip || 0, (skip || 0) + limit);
+      }
+
+      const runRange = async (from, to) => {
+        const applied = build();
+        let query = applySort(applied.query, sort);
+        const { data, error } = await query.range(from, to);
+        throwIfError(error, `Failed to filter ${entityName}`);
+        return data || [];
+      };
+
+      if ((Number(limit) || 0) > CHUNK_THRESHOLD) {
+        return fetchInChunks(runRange, { skip, limit, chunkSize: PAGE_CHUNK });
+      }
+
+      if (skip) return runRange(skip, skip + limit - 1);
+
+      const applied = build();
+      let query = applySort(applied.query, sort).limit(limit);
       const { data, error } = await query;
       throwIfError(error, `Failed to filter ${entityName}`);
-      let rows = data || [];
-      if (applied.postFilter) {
-        rows = applied.postFilter(rows);
-        rows = rows.slice(skip || 0, (skip || 0) + limit);
-      }
-      return rows;
+      return data || [];
     },
 
     async get(id) {

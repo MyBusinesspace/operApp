@@ -163,8 +163,32 @@ export async function routeApiRequest(request) {
   if (kind === "functions") {
     const name = rest[0];
     if (!name) return jsonResponse({ error: "Missing function name" }, 404);
-    // Action only — the query string can carry access tokens.
     console.log("[api] function", name, url.searchParams.get("action") || "");
+
+    // Pagination upgrades that must not edit base44/functions/** sources.
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      try {
+        const cloned = request.clone();
+        const body = await cloned.json().catch(() => ({}));
+        const action = url.searchParams.get("action") || body?.action || "";
+        console.log("[api] function", name, action);
+
+        if (name === "apiAuth" && body?.action === "entityQuery") {
+          const { tryHandleEntityQuery } = await import("./mobile-entity-query.js");
+          const handled = await tryHandleEntityQuery(request, body);
+          if (handled) return handled;
+        }
+
+        if (name === "apiTimesheet" && body?.action === "get_entries") {
+          const { tryHandleTimesheetGetEntries } = await import("./timesheet-page.js");
+          const handled = await tryHandleTimesheetGetEntries(request, body);
+          if (handled) return handled;
+        }
+      } catch (error) {
+        console.error("[api] pagination intercept failed", error);
+      }
+    }
+
     const handler = await getFunctionHandler(name);
     if (!handler) {
       handlerCache.delete(name);
