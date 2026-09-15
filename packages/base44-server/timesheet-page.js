@@ -234,7 +234,7 @@ export async function tryHandleTimesheetGetTasks(request, body) {
   if (viewAll && !date && !search) {
     const raw = await auth.base44.asServiceRole.entities.Task.filter(
       filter,
-      "-planning_date",
+      "-created_date",
       limit + 1,
       skip
     );
@@ -252,7 +252,7 @@ export async function tryHandleTimesheetGetTasks(request, body) {
     while (matched.length < need && dbSkip < maxScan) {
       const batch = await auth.base44.asServiceRole.entities.Task.filter(
         filter,
-        "-planning_date",
+        "-created_date",
         batchSize,
         dbSkip
       );
