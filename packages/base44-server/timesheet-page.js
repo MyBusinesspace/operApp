@@ -92,6 +92,64 @@ function pageArgs(body, defaultLimit) {
   return { limit, skip };
 }
 
+/** Same searchable fields as mobile `taskSearchableText`. */
+function taskSearchHaystack(task) {
+  const parts = [
+    task.id,
+    task.reference,
+    task.title,
+    task.description,
+    task.status,
+    task.category,
+    task.work_order_id,
+    task.work_order_name,
+    task.project_id,
+    task.project_name,
+    task.contact_id,
+    task.contact_name,
+    task.asset_id,
+    task.asset_name,
+    task.planning_date,
+    task.planning_time_in,
+    task.planning_time_out,
+    task.priority,
+    task.notes,
+    task.location_address,
+    task.location_lat != null ? String(task.location_lat) : null,
+    task.location_lng != null ? String(task.location_lng) : null,
+    task.created_date,
+    task.updated_date,
+    task.created_by_id,
+    task.created_by,
+    task.recurrence_frequency,
+    task.recurrence_end_date,
+    task.last_generated_date,
+    task.recurrence_template_id,
+    ...(task.assigned_users || []),
+    ...(task.assigned_user_names || []),
+    ...(task.assigned_employees || []),
+    ...(task.assigned_employee_names || []),
+    ...(task.assigned_team_ids || []),
+    ...(task.assigned_team_names || []),
+    ...((task.photos || []).map((p) => p?.caption).filter(Boolean)),
+  ];
+  return parts
+    .filter((p) => p != null && String(p).trim() !== "")
+    .join(" ")
+    .toLowerCase();
+}
+
+function taskMatchesSearch(task, rawQuery) {
+  const q = String(rawQuery || "").trim().toLowerCase();
+  if (!q) return true;
+  return taskSearchHaystack(task).includes(q);
+}
+
+function readSearchQuery(body) {
+  const raw = body?.search ?? body?.q ?? body?.query ?? "";
+  return String(raw).trim();
+}
+
 /**
  * @returns {Promise<Response|null>}
  */
@@ -150,7 +208,7 @@ export async function tryHandleTimesheetGetEntries(request, body) {
 
 /**
  * Paginated get_tasks. Walks the Task table when results must be filtered to
- * the caller's assignments so each page has up to `limit` visible rows.
+ * the caller's assignments / search so each page has up to `limit` visible rows.
  * @returns {Promise<Response|null>}
  */
 export async function tryHandleTimesheetGetTasks(request, body) {
@@ -161,6 +219,7 @@ export async function tryHandleTimesheetGetTasks(request, body) {
   if (auth.error) return auth.error;
 
   const { status, date, scope } = body;
+  const search = readSearchQuery(body);
   const { limit, skip } = pageArgs(body, scope === "clock_in" ? 50 : 50);
   const viewAll =
     scope === "clock_in" ? true : await canViewAllTasks(auth.base44, auth.employee);
@@ -171,7 +230,8 @@ export async function tryHandleTimesheetGetTasks(request, body) {
   let pageTasks;
   let hasMore;
 
-  if (viewAll && !date) {
+  // Fast path: no assignment / date / text post-filter.
+  if (viewAll && !date && !search) {
     const raw = await auth.base44.asServiceRole.entities.Task.filter(
       filter,
       "-planning_date",
@@ -181,14 +241,15 @@ export async function tryHandleTimesheetGetTasks(request, body) {
     hasMore = raw.length > limit;
     pageTasks = hasMore ? raw.slice(0, limit) : raw;
   } else {
-    // Need post-filter (assignment and/or planning_date) — scan forward until
-    // we can slice [skip, skip+limit) of matching rows.
+    // Scan forward until we can slice [skip, skip+limit) of matching rows.
     const matched = [];
     let dbSkip = 0;
     const batchSize = 100;
     const need = skip + limit + 1;
+    // Bound worst-case scans when searching a rare term.
+    const maxScan = search ? 5000 : 20000;
 
-    while (matched.length < need) {
+    while (matched.length < need && dbSkip < maxScan) {
       const batch = await auth.base44.asServiceRole.entities.Task.filter(
         filter,
         "-planning_date",
@@ -200,6 +261,7 @@ export async function tryHandleTimesheetGetTasks(request, body) {
       for (const task of batch) {
         if (!viewAll && !isTaskAssignedToEmployee(task, auth.employee)) continue;
         if (date && task.planning_date !== date) continue;
+        if (search && !taskMatchesSearch(task, search)) continue;
         matched.push(task);
         if (matched.length >= need) break;
       }
@@ -216,6 +278,7 @@ export async function tryHandleTimesheetGetTasks(request, body) {
     success: true,
     tasks: pageTasks,
     view_all: viewAll,
+    search: search || null,
     skip,
     limit,
     has_more: hasMore,
