@@ -184,6 +184,12 @@ export async function routeApiRequest(request) {
           const handled = await tryHandleTimesheetGetEntries(request, body);
           if (handled) return handled;
         }
+
+        if (name === "apiTimesheet" && body?.action === "get_tasks") {
+          const { tryHandleTimesheetGetTasks } = await import("./timesheet-page.js");
+          const handled = await tryHandleTimesheetGetTasks(request, body);
+          if (handled) return handled;
+        }
       } catch (error) {
         console.error("[api] pagination intercept failed", error);
       }

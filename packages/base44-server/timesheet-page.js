@@ -1,7 +1,8 @@
 /**
- * Paginated get_entries for apiTimesheet — Vercel only.
- * Base44's handler accepts `limit` but not `skip`. When the mobile client sends
- * skip (BACKEND=vercel), we answer here without touching base44/functions/**.
+ * Paginated apiTimesheet actions for Vercel — without editing base44/functions/**.
+ *
+ * Activates only when the client sends `skip` (or `page`). Otherwise the
+ * original Base44 handler runs unchanged (Base44 mobile builds never send skip).
  */
 import { createClient } from "./sdk.js";
 
@@ -18,7 +19,12 @@ async function loadEmployee(request, body) {
     return { error: json({ error: "Missing X-Employee-ID header or employee_id in body" }, 401) };
   }
   const base44 = createClient({ accessToken: null });
-  const rows = await base44.asServiceRole.entities.Employee.filter({ id: employeeId }, undefined, 1, 0);
+  const rows = await base44.asServiceRole.entities.Employee.filter(
+    { id: employeeId },
+    undefined,
+    1,
+    0
+  );
   const employee = rows[0];
   if (!employee) return { error: json({ error: "Employee not found" }, 401) };
   if (employee.status === "Terminated" || employee.status === "Inactive") {
@@ -27,21 +33,63 @@ async function loadEmployee(request, body) {
   return { employee, employeeId, base44 };
 }
 
-async function canViewAll(base44, employee) {
-  try {
-    const roles = await base44.asServiceRole.entities.EmployeeRole.list("name", 200);
-    const key =
-      roles.find((r) => r.key === employee.role)?.key ||
-      roles.find((r) => r.name === employee.role)?.key;
-    if (key === "admin") return true;
-    const perms = await base44.asServiceRole.entities.RolePermission.filter({
-      role: key,
-      module: "timesheets",
-    });
-    return !!perms?.[0]?.can_view;
-  } catch {
-    return false;
-  }
+async function resolveRoleKey(base44, roleVal) {
+  const val = String(roleVal || "").trim();
+  if (!val) return null;
+  const roles = await base44.asServiceRole.entities.EmployeeRole.list("name", 200);
+  return (roles.find((r) => r.key === val) || roles.find((r) => r.name === val))?.key ?? null;
+}
+
+async function isPlatformAdmin(base44, employee) {
+  return (await resolveRoleKey(base44, employee.role)) === "admin";
+}
+
+async function getRolePermission(base44, roleKey, module) {
+  if (!roleKey) return null;
+  const perms = await base44.asServiceRole.entities.RolePermission.filter({
+    role: roleKey,
+    module,
+  });
+  return perms?.[0] ?? null;
+}
+
+async function canViewAllTasks(base44, employee) {
+  if (await isPlatformAdmin(base44, employee)) return true;
+  const roleKey = await resolveRoleKey(base44, employee.role);
+  const perm = await getRolePermission(base44, roleKey, "tasks");
+  if (!perm) return false;
+  if (perm.can_view === false) return false;
+  return perm.can_create_on_behalf === true;
+}
+
+async function canViewAllTimeEntries(base44, employee) {
+  if (await isPlatformAdmin(base44, employee)) return true;
+  const roleKey = await resolveRoleKey(base44, employee.role);
+  const perm = await getRolePermission(base44, roleKey, "timesheets");
+  if (!perm) return true;
+  if (perm.can_view === false) return false;
+  return true;
+}
+
+function isTaskAssignedToEmployee(task, employee) {
+  const employeeId = employee?.id;
+  if (!employeeId) return false;
+  if ((task.assigned_employees || []).includes(employeeId)) return true;
+  if ((task.assigned_users || []).includes(employeeId)) return true;
+
+  const hasNamedAssignees =
+    (task.assigned_employees || []).length > 0 || (task.assigned_users || []).length > 0;
+  if (hasNamedAssignees) return false;
+
+  const teamId = employee?.team_id;
+  if (teamId && (task.assigned_team_ids || []).includes(teamId)) return true;
+  return false;
+}
+
+function pageArgs(body, defaultLimit) {
+  const limit = Math.min(Math.max(1, Number(body.limit) || defaultLimit), 500);
+  const skip = Math.max(0, Number(body.skip) || Number(body.page) * limit || 0);
+  return { limit, skip };
 }
 
 /**
@@ -49,17 +97,16 @@ async function canViewAll(base44, employee) {
  */
 export async function tryHandleTimesheetGetEntries(request, body) {
   if (body?.action !== "get_entries") return null;
-  // Only take over when the client asks for paging (Base44 path has no skip).
   if (body.skip == null && body.page == null) return null;
 
   const auth = await loadEmployee(request, body);
   if (auth.error) return auth.error;
 
   const { date_from, date_to, scope } = body;
-  const limit = Math.min(Math.max(1, Number(body.limit) || 100), 500);
-  const skip = Math.max(0, Number(body.skip) || Number(body.page) * limit || 0);
+  const { limit, skip } = pageArgs(body, 100);
   const viewAll =
-    (scope === "all" || scope === "team") && (await canViewAll(auth.base44, auth.employee));
+    (scope === "all" || scope === "team") &&
+    (await canViewAllTimeEntries(auth.base44, auth.employee));
 
   const filter = {};
   if (!viewAll) filter.employee_id = auth.employeeId;
@@ -98,5 +145,80 @@ export async function tryHandleTimesheetGetEntries(request, body) {
     limit,
     has_more: hasMore,
     next_skip: hasMore ? skip + entries.length : null,
+  });
+}
+
+/**
+ * Paginated get_tasks. Walks the Task table when results must be filtered to
+ * the caller's assignments so each page has up to `limit` visible rows.
+ * @returns {Promise<Response|null>}
+ */
+export async function tryHandleTimesheetGetTasks(request, body) {
+  if (body?.action !== "get_tasks") return null;
+  if (body.skip == null && body.page == null) return null;
+
+  const auth = await loadEmployee(request, body);
+  if (auth.error) return auth.error;
+
+  const { status, date, scope } = body;
+  const { limit, skip } = pageArgs(body, scope === "clock_in" ? 50 : 50);
+  const viewAll =
+    scope === "clock_in" ? true : await canViewAllTasks(auth.base44, auth.employee);
+
+  const filter = {};
+  if (status) filter.status = status;
+
+  let pageTasks;
+  let hasMore;
+
+  if (viewAll && !date) {
+    const raw = await auth.base44.asServiceRole.entities.Task.filter(
+      filter,
+      "-planning_date",
+      limit + 1,
+      skip
+    );
+    hasMore = raw.length > limit;
+    pageTasks = hasMore ? raw.slice(0, limit) : raw;
+  } else {
+    // Need post-filter (assignment and/or planning_date) — scan forward until
+    // we can slice [skip, skip+limit) of matching rows.
+    const matched = [];
+    let dbSkip = 0;
+    const batchSize = 100;
+    const need = skip + limit + 1;
+
+    while (matched.length < need) {
+      const batch = await auth.base44.asServiceRole.entities.Task.filter(
+        filter,
+        "-planning_date",
+        batchSize,
+        dbSkip
+      );
+      if (!batch.length) break;
+
+      for (const task of batch) {
+        if (!viewAll && !isTaskAssignedToEmployee(task, auth.employee)) continue;
+        if (date && task.planning_date !== date) continue;
+        matched.push(task);
+        if (matched.length >= need) break;
+      }
+
+      dbSkip += batch.length;
+      if (batch.length < batchSize) break;
+    }
+
+    pageTasks = matched.slice(skip, skip + limit);
+    hasMore = matched.length > skip + limit;
+  }
+
+  return json({
+    success: true,
+    tasks: pageTasks,
+    view_all: viewAll,
+    skip,
+    limit,
+    has_more: hasMore,
+    next_skip: hasMore ? skip + pageTasks.length : null,
   });
 }
