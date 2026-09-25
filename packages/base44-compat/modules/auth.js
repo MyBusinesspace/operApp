@@ -236,17 +236,25 @@ async function ensureProfile(user, extras = {}) {
 /**
  * Returns the current session, waiting for an in-flight OAuth redirect to be
  * exchanged. Without this the first load after Google sign-in looks signed-out.
+ *
+ * Important: a leftover `pending-oauth-exchange` token must NOT block normal
+ * page loads for ~12s (that left users staring at the logo after a failed OAuth).
  */
-async function resolveSession(timeoutMs = 12000) {
+async function resolveSession(timeoutMs = 5000) {
   const supabase = getSupabase();
   const { data } = await supabase.auth.getSession();
   if (data?.session) return data.session;
 
-  const pending =
-    startedWithOAuthCallback() ||
-    hasPendingOAuthCallback() ||
-    getAccessToken() === PENDING_OAUTH_TOKEN;
-  if (!pending) return null;
+  const oauthCallbackThisLoad =
+    startedWithOAuthCallback() || hasPendingOAuthCallback();
+
+  // Stale placeholder from a previous failed Google redirect — drop it.
+  if (!oauthCallbackThisLoad && getAccessToken() === PENDING_OAUTH_TOKEN) {
+    removeAccessToken();
+    return null;
+  }
+
+  if (!oauthCallbackThisLoad) return null;
 
   return new Promise((resolve) => {
     let settled = false;
@@ -260,7 +268,10 @@ async function resolveSession(timeoutMs = 12000) {
       resolve(session);
     };
 
-    const timer = setTimeout(() => finish(null), timeoutMs);
+    const timer = setTimeout(() => {
+      removeAccessToken();
+      finish(null);
+    }, timeoutMs);
     subscription = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) finish(session);
     }).data?.subscription;
@@ -353,10 +364,13 @@ export function createAuthModule(options = {}) {
         .then(({ data, error }) => {
           if (error) {
             console.error("OAuth error", error);
+            const msg = String(error.message || "");
             window.alert(
-              error.message?.includes("provider is not enabled")
-                ? "Google login is not enabled yet. Fill supabase/.env with Google Client ID/Secret, set [auth.external.google] enabled = true, then run: npm run db:stop && npm run db:start"
-                : error.message
+              msg.includes("provider is not enabled")
+                ? "Google login is not enabled yet. Enable Google under Supabase Auth → Providers, then retry."
+                : /bad gateway|unexpected_failure|flow state|503|502/i.test(msg)
+                  ? "Google sign-in failed because Supabase Auth is unavailable right now. Check the Supabase project is Active, then retry."
+                  : error.message
             );
             return;
           }
