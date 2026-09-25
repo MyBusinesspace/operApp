@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { base44 } from "@/api/base44Client";
 import ProductPickerModal from "@/components/sales/ProductPickerModal";
+import LinkedRecordsSection from "@/components/sales/LinkedRecordsSection";
 import { useChartOfAccounts } from "@/hooks/useChartOfAccounts";
 import AccountCombobox from "@/components/accounting/AccountCombobox";
 import DocumentFilesPopover from "@/components/shared/DocumentFilesPopover";
@@ -61,6 +62,7 @@ const EMPTY = {
   currency: "AED", subtotal: 0, tax_amount: 0, total: 0,
   notes: "", title: "", doc_summary: "",
   project_id: "", project_name: "", work_order_id: "", work_order_name: "",
+  task_ids: [], task_names: [], task_references: [],
   purchase_order_id: "", purchase_order_number: "",
   department: "",
   line_items: [],
@@ -637,17 +639,12 @@ export default function BillFormBody({ bill, contacts = [], onSave, onClose, onP
           </div>
         </div>
 
-        {/* Linked Project / WO */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Project (optional)</label>
-            <Input placeholder="Project name" value={form.project_name || ""} onChange={e => set("project_name", e.target.value)} />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Work Order (optional)</label>
-            <Input placeholder="Work order name" value={form.work_order_name || ""} onChange={e => set("work_order_name", e.target.value)} />
-          </div>
-        </div>
+        {/* Linked Project / WO / Tasks */}
+        <LinkedRecordsSection
+          form={form}
+          onChange={updates => setForm(f => ({ ...f, ...updates }))}
+          contactId={form.contact_id}
+        />
 
         {/* Line Items */}
         <div>

@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { format, isSameDay } from "date-fns";
 import { base44 } from "@/api/base44Client";
 import { Users, User, FolderKanban, Timer } from "lucide-react";
+import TaskHoverTooltip from "./TaskHoverTooltip";
 
 const SIDEBAR_W = 176; // px — matches w-44
 const DAY_START = 0;
@@ -59,7 +60,7 @@ const VIEW_ICONS = {
 };
 
 // ─── TaskBlock ────────────────────────────────────────────────────────────────
-function TaskBlock({ task, employees, timeEntries, startMin, endMin, top, blockHeight, pixelsPerHour, onMoveStart, onResizeStart, isDragging, onLeaveIds }) {
+function TaskBlock({ task, employees, timeEntries, startMin, endMin, top, blockHeight, pixelsPerHour, onMoveStart, onResizeStart, isDragging, onLeaveIds, subtasks, onTaskClick, onTaskDelete, onUpdateWorkers, onComplete }) {
   // Employees on leave for the current day are auto-excluded from the task block,
   // but remain visible in their team's sidebar column so they can be scheduled on other days.
   const assignedEmps = (task.assigned_employees || [])
@@ -82,8 +83,34 @@ function TaskBlock({ task, employees, timeEntries, startMin, endMin, top, blockH
   const bg = STATUS_BG[task.status] || STATUS_BG["Queued"];
   const dur = planDuration(startMin, endMin);
 
+  const [tooltipPos, setTooltipPos] = useState(null);
+  const closeTimerRef = useRef(null);
+
+  // Resolve all assigned employees (including fallback names) for the tooltip
+  let tooltipEmps = (task.assigned_employees || []).map(id => employees.find(e => e.id === id)).filter(Boolean);
+  if (tooltipEmps.length === 0 && (task.assigned_employee_names || []).length > 0) {
+    tooltipEmps = (task.assigned_employee_names || []).map(name => employees.find(e => e.full_name === name)).filter(Boolean);
+  }
+  const tooltipFallback = task.assigned_employee_names || [];
+  const displayTooltipEmps = tooltipEmps.length > 0 ? tooltipEmps : tooltipFallback.slice(0, 6).map((n, i) => ({ _fb: true, id: `fb${i}`, full_name: n }));
+
+  const handleMouseEnter = (e) => {
+    if (isDragging) return;
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPos({ top: rect.bottom + 6, left: rect.left });
+  };
+  const handleMouseLeave = () => {
+    closeTimerRef.current = setTimeout(() => setTooltipPos(null), 200);
+  };
+  const cancelClose = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  };
+
   return (
     <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`absolute border rounded-lg overflow-hidden text-[10px] shadow-sm select-none transition-opacity ${bg} ${isDragging ? "opacity-30 pointer-events-none" : "opacity-100"}`}
       style={{ left, width, top, height }}
     >
@@ -144,12 +171,25 @@ function TaskBlock({ task, employees, timeEntries, startMin, endMin, top, blockH
           {dur && <span className="ml-1 font-semibold text-primary">({dur})</span>}
         </p>
       </div>
+      <TaskHoverTooltip
+        task={task}
+        displayEmps={displayTooltipEmps}
+        subtasks={subtasks || []}
+        dur={dur}
+        position={tooltipPos}
+        onClick={onTaskClick}
+        onUpdateWorkers={onUpdateWorkers}
+        onComplete={onComplete}
+        onDelete={onTaskDelete}
+        onClose={() => setTooltipPos(null)}
+        cancelClose={cancelClose}
+      />
     </div>
   );
 }
 
 // ─── ScheduleRow ─────────────────────────────────────────────────────────────
-function ScheduleRow({ entity, viewBy, localTasks, employees, teams, projects, timeEntries, currentDay, pixelsPerHour, interaction, onMoveStart, onResizeStart, onLeaveIds }) {
+function ScheduleRow({ entity, viewBy, localTasks, employees, teams, projects, timeEntries, currentDay, pixelsPerHour, interaction, onMoveStart, onResizeStart, onLeaveIds, subtasksMap, onTaskClick, onTaskDelete, onUpdateWorkers, onComplete }) {
 
   // Filter tasks for this entity
   const dayTasks = localTasks.filter(task => {
@@ -284,6 +324,11 @@ function ScheduleRow({ entity, viewBy, localTasks, employees, teams, projects, t
                 onMoveStart={onMoveStart}
                 onResizeStart={onResizeStart}
                 onLeaveIds={onLeaveIds}
+                subtasks={subtasksMap?.[task.id] || []}
+                onTaskClick={onTaskClick}
+                onTaskDelete={onTaskDelete}
+                onUpdateWorkers={onUpdateWorkers}
+                onComplete={onComplete}
               />
             );
           })
@@ -294,7 +339,7 @@ function ScheduleRow({ entity, viewBy, localTasks, employees, teams, projects, t
 }
 
 // ─── DailyView ────────────────────────────────────────────────────────────────
-export default function DailyView({ currentDay, teams, projects, employees, tasks: propTasks, timeEntries, onTasksRefresh, onTaskUpdate, viewBy, setViewBy, sortedRows, onLeaveIds }) {
+export default function DailyView({ currentDay, teams, projects, employees, tasks: propTasks, timeEntries, onTasksRefresh, onTaskUpdate, viewBy, setViewBy, sortedRows, onLeaveIds, subtasksMap, onTaskClick, onTaskDelete, onUpdateWorkers, onComplete }) {
   const wrapperRef = useRef(null);
   const [pixelsPerHour, setPixelsPerHour] = useState(80);
 
@@ -570,6 +615,11 @@ export default function DailyView({ currentDay, teams, projects, employees, task
                 onMoveStart={handleMoveStart}
                 onResizeStart={handleResizeStart}
                 onLeaveIds={onLeaveIds}
+                subtasksMap={subtasksMap}
+                onTaskClick={onTaskClick}
+                onTaskDelete={onTaskDelete}
+                onUpdateWorkers={onUpdateWorkers}
+                onComplete={onComplete}
               />
             </div>
           ))

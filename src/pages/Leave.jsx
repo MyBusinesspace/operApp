@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCurrentEmployee } from "@/hooks/useCurrentEmployee";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -452,11 +453,14 @@ export default function Leave() {
     <div className="space-y-6">
       {/* Leave page header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Leave</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {canApprove ? "Manage team leave requests & approvals" : canView ? "View team leave requests" : "Submit and track your leave requests"}
-          </p>
+        <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/timehr-overview" />
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Leave</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {canApprove ? "Manage team leave requests & approvals" : canView ? "View team leave requests" : "Submit and track your leave requests"}
+            </p>
+          </div>
         </div>
         {canCreate && (
           <Button onClick={() => setShowForm(true)} className="gap-2">
@@ -587,7 +591,7 @@ export default function Leave() {
             )}
           </div>
         ) : (
-          <div className="overflow-hidden">
+          <div className="overflow-hidden scrollable-table">
             <table className="w-full table-fixed text-sm border-collapse">
               <colgroup>
                 <col className="w-[14%]" />

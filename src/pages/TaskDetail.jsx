@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, CheckSquare, Pencil, MapPin, Calendar, Clock, Paperclip,
   User, FolderKanban, Hash, Package, ClipboardList, FileText, Receipt, FileCheck2,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TaskFormModal from "@/components/tasks/TaskFormModal";
@@ -12,7 +13,10 @@ import TaskSubtasks from "@/components/tasks/TaskSubtasks";
 import TaskReportsList from "@/components/tasks/TaskReportsList";
 import TaskHistoryPanel, { logTaskHistory } from "@/components/tasks/TaskHistoryPanel";
 import ReportQuickViewModal from "@/components/tasks/ReportQuickViewModal";
+import WorkingReportEditModal from "@/components/tasks/WorkingReportEditModal";
 import WorkhandCostPanel from "@/components/shared/WorkhandCostPanel";
+import TaskBillsPanel from "@/components/tasks/TaskBillsPanel";
+import TaskFinancialSummary from "@/components/tasks/TaskFinancialSummary";
 import { getEffectiveStatus } from "@/lib/taskStatus";
 import { computeChanges } from "@/lib/changeLog";
 
@@ -34,18 +38,41 @@ const PRIORITY_STYLES = {
 };
 
 const TABS = [
-  { id: "all",      label: "All" },
-  { id: "reports",  label: "Reports" },
-  { id: "subtasks", label: "Subtasks" },
-  { id: "labour",   label: "Labour Cost" },
-  { id: "invoices", label: "Invoices" },
-  { id: "quotes",   label: "Quotes" },
+  { id: "all",       label: "All" },
+  { id: "reports",   label: "Reports" },
+  { id: "subtasks",  label: "Subtasks" },
+  { id: "labour",    label: "Labour Analysis" },
+  { id: "financial", label: "Financial Summary" },
+  { id: "invoices",  label: "Invoices" },
+  { id: "bills",     label: "Bills" },
+  { id: "quotes",    label: "Quotes" },
   { id: "history",  label: "History & Notes" },
 ];
 
 function fmtDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+function fmtDuration(minutes) {
+  if (!minutes || minutes === 0) return "—";
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+function getTimeSummary(reports) {
+  if (!reports || reports.length === 0) return { completedDate: null, totalMinutes: 0 };
+  let totalMinutes = 0;
+  let latestClockOut = null;
+  reports.forEach(r => {
+    if (r.duration_minutes) totalMinutes += r.duration_minutes;
+    if (r.clock_out_time) {
+      const dt = new Date(r.clock_out_time);
+      if (!latestClockOut || dt > latestClockOut) latestClockOut = dt;
+    }
+  });
+  return { completedDate: latestClockOut, totalMinutes };
 }
 function fmtCurrency(n, currency = "AED") {
   if (!n && n !== 0) return "—";
@@ -104,14 +131,18 @@ export default function TaskDetail() {
   const [workOrders, setWorkOrders] = useState([]);
   const [subtasks, setSubtasks] = useState([]);
   const [reports, setReports] = useState([]);
+  const [timeEntries, setTimeEntries] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [bills, setBills] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
   const [editModal, setEditModal] = useState(false);
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const [reportModal, setReportModal] = useState({ open: false, report: null });
+  const [editReportModal, setEditReportModal] = useState({ open: false, report: null });
+  const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -125,20 +156,25 @@ export default function TaskDetail() {
       setTask(t || null);
       const results = await Promise.allSettled([
         base44.entities.WorkOrder.list("title", 200),
-        base44.entities.TaskSubtask.filter({ task_id: id }, "sort_order"),
+        base44.entities.TaskSubtask.filter({ task_id: id }, "sort_order", 1000),
         base44.entities.WorkingReport.filter({ task_id: id }, "-clock_in_time"),
+        base44.entities.TimeEntry.filter({ task_id: id }, "-clock_in_time"),
         base44.entities.Invoice.list("-created_date", 500),
         base44.entities.Quote.list("-created_date", 500),
+        base44.entities.Bill.list("-created_date", 500),
         base44.entities.TaskStatus.list("name", 100),
       ]);
       setWorkOrders(results[0].status === "fulfilled" ? results[0].value || [] : []);
       setSubtasks(results[1].status === "fulfilled" ? results[1].value || [] : []);
       setReports(results[2].status === "fulfilled" ? results[2].value || [] : []);
-      const invs = results[3].status === "fulfilled" ? results[3].value || [] : [];
-      const qts = results[4].status === "fulfilled" ? results[4].value || [] : [];
+      setTimeEntries(results[3].status === "fulfilled" ? results[3].value || [] : []);
+      const invs = results[4].status === "fulfilled" ? results[4].value || [] : [];
+      const qts = results[5].status === "fulfilled" ? results[5].value || [] : [];
+      const bls = results[6].status === "fulfilled" ? results[6].value || [] : [];
       setInvoices(invs.filter(d => (d.task_ids || []).includes(id)));
       setQuotes(qts.filter(d => (d.task_ids || []).includes(id)));
-      setStatuses(results[5].status === "fulfilled" ? results[5].value || [] : []);
+      setBills(bls.filter(d => (d.task_ids || []).includes(id)));
+      setStatuses(results[7].status === "fulfilled" ? results[7].value || [] : []);
     } catch (e) {
       console.error("TaskDetail load error:", e);
     }
@@ -198,7 +234,7 @@ export default function TaskDetail() {
     );
   }
 
-  const effStatus = getEffectiveStatus(task);
+  const effStatus = getEffectiveStatus(task, reports, subtasks);
   const customStatus = statuses.find(s => s.name === task.status);
   const statusBadgeStyle = customStatus
     ? { backgroundColor: customStatus.color + "20", color: customStatus.color }
@@ -206,15 +242,19 @@ export default function TaskDetail() {
   const statusBadgeClass = customStatus ? "" : (STATUS_STYLES[effStatus] || "bg-muted text-muted-foreground");
 
   const tabCounts = {
-    all: reports.length + subtasks.length + invoices.length + quotes.length,
+    all: reports.length + subtasks.length + invoices.length + quotes.length + bills.length,
     reports: reports.length,
     subtasks: subtasks.length,
     labour: 0,
+    financial: 0,
     invoices: invoices.length,
+    bills: bills.length,
     quotes: quotes.length,
     history: 0,
   };
-  const visibleTabs = TABS.filter(t => t.id === "all" || t.id === "labour" || t.id === "history" || (tabCounts[t.id] ?? 0) > 0);
+  const visibleTabs = TABS.filter(t =>
+    t.id === "all" || t.id === "labour" || t.id === "financial" || t.id === "history" || t.id === "bills" || (tabCounts[t.id] ?? 0) > 0
+  );
 
   const mapsLink = task.location_lat && task.location_lng
     ? `https://www.google.com/maps?q=${task.location_lat},${task.location_lng}`
@@ -307,6 +347,28 @@ export default function TaskDetail() {
                   )}
                 </span>
               )}
+              {(() => {
+                const { completedDate, totalMinutes } = getTimeSummary(timeEntries);
+                return (
+                  <>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-muted-foreground/60">Created:</span>
+                      <span>{fmtDate(task.created_date)}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <CheckSquare className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-muted-foreground/60">Completed:</span>
+                      <span>{fmtDate(completedDate)}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium text-foreground">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-muted-foreground/60 font-normal">Total Time:</span>
+                      {fmtDuration(totalMinutes)}
+                    </span>
+                  </>
+                );
+              })()}
               {task.location_address && (
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 shrink-0" /> {task.location_address}
@@ -338,7 +400,7 @@ export default function TaskDetail() {
           { label: "Reports",   count: reports.length,      Icon: FileText,    color: "text-primary" },
           { label: "Subtasks",   count: subtasks.length,     Icon: CheckSquare, color: "text-indigo-600" },
           { label: "Invoices",   count: invoices.length,     Icon: Receipt,     color: "text-emerald-600" },
-          { label: "Quotes",     count: quotes.length,       Icon: FileCheck2,  color: "text-blue-600" },
+          { label: "Bills",      count: bills.length,        Icon: FileCheck2,  color: "text-amber-600" },
         ].map(s => (
           <div key={s.label} className="bg-card rounded-xl border border-border p-3 text-center">
             <s.Icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
@@ -379,7 +441,12 @@ export default function TaskDetail() {
               {reports.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Reports</p>
-                  <TaskReportsList taskId={id} onViewReport={(r) => setReportModal({ open: true, report: r })} />
+                  <TaskReportsList
+                    taskId={id}
+                    onViewReport={(r) => setReportModal({ open: true, report: r })}
+                    onEditReport={(r) => setEditReportModal({ open: true, report: r })}
+                    refreshKey={reportsRefreshKey}
+                  />
                 </div>
               )}
               {subtasks.length > 0 && (
@@ -392,6 +459,12 @@ export default function TaskDetail() {
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Invoices</p>
                   <DocumentsTable docs={invoices} type="Invoices" />
+                </div>
+              )}
+              {bills.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Bills</p>
+                  <DocumentsTable docs={bills} type="Bills" />
                 </div>
               )}
               {quotes.length > 0 && (
@@ -410,7 +483,12 @@ export default function TaskDetail() {
             </div>
           )}
           {tab === "reports" && (
-            <TaskReportsList taskId={id} onViewReport={(r) => setReportModal({ open: true, report: r })} />
+            <TaskReportsList
+              taskId={id}
+              onViewReport={(r) => setReportModal({ open: true, report: r })}
+              onEditReport={(r) => setEditReportModal({ open: true, report: r })}
+              refreshKey={reportsRefreshKey}
+            />
           )}
           {tab === "subtasks" && (
             <TaskSubtasks taskId={id} subtasks={subtasks} onSubtasksChange={setSubtasks} />
@@ -418,7 +496,24 @@ export default function TaskDetail() {
           {tab === "labour" && (
             <WorkhandCostPanel filterKey="task_id" filterId={id} currency="AED" />
           )}
+          {tab === "financial" && (
+            <TaskFinancialSummary
+              taskId={id}
+              task={task}
+              invoices={invoices}
+              bills={bills}
+              refreshKey={reportsRefreshKey}
+            />
+          )}
           {tab === "invoices" && <DocumentsTable docs={invoices} type="Invoices" />}
+          {tab === "bills" && (
+            <TaskBillsPanel
+              taskId={id}
+              task={task}
+              bills={bills}
+              onBillsChange={load}
+            />
+          )}
           {tab === "quotes" && <DocumentsTable docs={quotes} type="Quotes" />}
           {tab === "history" && (
             <TaskHistoryPanel taskId={id} taskReference={task.reference} refreshTrigger={historyRefresh} />
@@ -439,6 +534,16 @@ export default function TaskDetail() {
         onClose={() => setReportModal({ open: false, report: null })}
         report={reportModal.report}
         task={task}
+      />
+
+      <WorkingReportEditModal
+        open={editReportModal.open}
+        onClose={() => setEditReportModal({ open: false, report: null })}
+        report={editReportModal.report}
+        onSaved={() => {
+          setEditReportModal({ open: false, report: null });
+          setReportsRefreshKey(k => k + 1);
+        }}
       />
     </div>
   );

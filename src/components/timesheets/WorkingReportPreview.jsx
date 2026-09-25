@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 import { DEFAULT_LAYOUT, resolveLayout, resolveBind } from "@/lib/workingReportLayout";
+import { getEffectiveStatus } from "@/lib/taskStatus";
 
 // Unified Working Report document renderer.
 // The report structure (sections, rows, variable bindings) is read from
@@ -433,8 +434,8 @@ export default function WorkingReportPreview({ template, entry, task }) {
       {layout.header?.showTitleStatus !== false && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: "#1a1a2e" }}>{title}</div>
-          <span style={{ background: tk.status === "Completed" ? "#228b57" : "#cc0000", color: "#fff", padding: "3px 14px", fontSize: 10, fontWeight: 800, borderRadius: 3, letterSpacing: 0.5 }}>
-            {tk.status === "Completed" ? "COMPLETED" : "NOT COMPLETED"}
+          <span style={{ background: getEffectiveStatus(tk, e ? [e] : [], tk.subtasks || []) === "Completed" ? "#228b57" : "#cc0000", color: "#fff", padding: "3px 14px", fontSize: 10, fontWeight: 800, borderRadius: 3, letterSpacing: 0.5 }}>
+            {getEffectiveStatus(tk, e ? [e] : [], tk.subtasks || []) === "Completed" ? "COMPLETED" : "NOT COMPLETED"}
           </span>
         </div>
       )}

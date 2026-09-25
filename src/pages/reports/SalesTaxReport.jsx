@@ -86,7 +86,7 @@ function SummaryTab({ reportData, totals, categories, dateFrom, dateTo, orgName 
         </div>
 
         {/* Data Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollable-table">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50 border-y border-border">
@@ -285,7 +285,7 @@ function AuditTab({ taxComponents, dateFrom, dateTo, orgName }) {
             No journal entries found for this period.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-[#005a9c] text-white">

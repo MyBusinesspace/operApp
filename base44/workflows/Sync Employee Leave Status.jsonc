@@ -1,0 +1,39 @@
+{
+  "name": "Sync Employee Leave Status",
+  "description": "Recomputes the affected employee's On Leave / Active status whenever a LeaveRequest is created, updated, or deleted \u2014 covers web app and mobile API inputs.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "LeaveRequest"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sync_employee_leave_status",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncEmployeeLeaveStatus",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "syncEmployeeLeaveStatus"
+  }
+}

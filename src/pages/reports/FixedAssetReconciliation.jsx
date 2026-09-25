@@ -290,7 +290,7 @@ export default function FixedAssetReconciliation() {
             <Link to="/accounting/fixed-assets" className="text-xs text-primary hover:underline mt-1 inline-block">Go to Fixed Assets →</Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

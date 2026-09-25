@@ -9,6 +9,7 @@ import {
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AssetFormModal from "@/components/assets/AssetFormModal";
@@ -235,9 +236,12 @@ export default function Assets() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Assets</h1>
-          <p className="text-sm text-muted-foreground mt-1">Equipment, machinery & asset tracking</p>
+        <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/business-overview" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Assets</h1>
+            <p className="text-sm text-muted-foreground mt-1">Equipment, machinery & asset tracking</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate("/settings/import-center?entity=Asset")}>
@@ -318,7 +322,7 @@ export default function Assets() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

@@ -173,7 +173,7 @@ export default function Statements() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto bg-card">
+      <div className="flex-1 overflow-auto bg-card scrollable-table">
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Loading statements...</div>
         ) : filtered.length === 0 ? (

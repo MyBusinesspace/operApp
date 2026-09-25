@@ -7,6 +7,7 @@ import { CheckSquare, Plus, Search, Pencil, Trash2, Clock, FolderKanban, Clipboa
 import { exportToCSV } from "@/lib/csvExport";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskFormModal from "@/components/tasks/TaskFormModal";
@@ -54,6 +55,29 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function fmtDuration(minutes) {
+  if (!minutes || minutes === 0) return "—";
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+function getTimeSummary(reports) {
+  if (!reports || reports.length === 0) return { completedDate: null, totalMinutes: 0 };
+  let totalMinutes = 0;
+  let latestClockOut = null;
+  reports.forEach(r => {
+    if (r.duration_minutes) totalMinutes += r.duration_minutes;
+    if (r.clock_out_time) {
+      const dt = new Date(r.clock_out_time);
+      if (!latestClockOut || dt > latestClockOut) latestClockOut = dt;
+    }
+  });
+  return { completedDate: latestClockOut, totalMinutes };
+}
+
 const STATUS_OPTIONS = ["Template", "Queued", "Scheduled", "Not Completed", "Completed"];
 const STATUS_STYLES = {
   Template:         "bg-cyan-100 text-cyan-700",
@@ -63,6 +87,7 @@ const STATUS_STYLES = {
   Active:           "bg-orange-100 text-orange-700",
   Completed:        "bg-emerald-100 text-emerald-700",
   Archived:         "bg-slate-200 text-slate-500",
+  Recurring:        "bg-violet-100 text-violet-700",
 };
 
 function StatusBadge({ status, statuses = [] }) {
@@ -149,6 +174,7 @@ export default function Tasks() {
   const [employeesMap, setEmployeesMap] = useState({});
   const [subtasksMap, setSubtasksMap] = useState({});
   const [reportsMap, setReportsMap] = useState({});
+  const [timeEntriesMap, setTimeEntriesMap] = useState({});
   const { allowed: canEditTasks } = usePermission("tasks", "can_edit");
   const [expandedTask, setExpandedTask] = useState(null);
   const [expandedReports, setExpandedReports] = useState(null);
@@ -172,6 +198,12 @@ export default function Tasks() {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
   const loadingRef = useRef(false);
+
+  // Display-only status: considers Working Reports + subtask completion so that
+  // a task with a WR shows "Completed"/"Not Completed" instead of "Scheduled".
+  // The DB status is NOT changed — only the badge reflects this.
+  const getDisplayStatus = (t) =>
+    getEffectiveStatus(t, reportsMap[t.id] || [], subtasksMap[t.id] || []);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -198,11 +230,12 @@ export default function Tasks() {
       () => withRetry(() => base44.entities.TaskStatus.list("name", 100)),
       () => withRetry(() => base44.entities.TaskCategory.list("name", 100)),
     ], 2);
-    const [subs, emps, reps] = await batchedAll([
-      () => withRetry(() => base44.entities.TaskSubtask.list("created_date", 500)),
+    const [subs, emps, reps, tEnts] = await batchedAll([
+      () => withRetry(() => base44.entities.TaskSubtask.list("created_date", 5000)),
       () => withRetry(() => base44.entities.Employee.list("full_name", 500)),
       () => withRetry(() => base44.entities.WorkingReport.list("-clock_in_time", 5000)),
-    ], 3);
+      () => withRetry(() => base44.entities.TimeEntry.list("-clock_in_time", 5000)),
+    ], 4);
 
     // Fix any tasks with incorrect status (apply correct status logic)
     const correctedTasks = t.map(task => {
@@ -239,6 +272,9 @@ export default function Tasks() {
     const rMap = {};
     (reps || []).forEach(r => { if (!rMap[r.task_id]) rMap[r.task_id] = []; rMap[r.task_id].push(r); });
     setReportsMap(rMap);
+    const tMap = {};
+    (tEnts || []).forEach(e => { if (!tMap[e.task_id]) tMap[e.task_id] = []; tMap[e.task_id].push(e); });
+    setTimeEntriesMap(tMap);
     setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -277,13 +313,13 @@ export default function Tasks() {
   const allCategories = categories.map(c => c.name);
 
   const recurringTemplates = tasks.filter(t => t.is_recurring);
-  const templateTasks = tasks.filter(t => !t.is_recurring && getEffectiveStatus(t) === "Template");
-  const regularTasks = tasks.filter(t => !t.is_recurring && getEffectiveStatus(t) !== "Template");
+  const templateTasks = tasks.filter(t => !t.is_recurring && getDisplayStatus(t) === "Template");
+  const regularTasks = tasks.filter(t => !t.is_recurring && getDisplayStatus(t) !== "Template");
 
   // Generated recurring tasks that fall in the current week/month (no planning date yet but belong to current period)
   const isCurrentPeriodRecurring = (t) => {
     if (!t.recurrence_template_id) return false;
-    if (getEffectiveStatus(t) === "Completed" || getEffectiveStatus(t) === "Not Completed") return false;
+    if (getDisplayStatus(t) === "Completed" || getDisplayStatus(t) === "Not Completed") return false;
     // Find the template to know frequency
     const template = tasks.find(tmpl => tmpl.id === t.recurrence_template_id);
     const freq = template?.recurrence_frequency || "monthly";
@@ -303,7 +339,7 @@ export default function Tasks() {
     }
   };
 
-  const plannedTasks = regularTasks.filter(t => getEffectiveStatus(t) === "Scheduled");
+  const plannedTasks = regularTasks.filter(t => getDisplayStatus(t) === "Scheduled");
 
   // Base set: tasks matching the status tab + search + category (non-dropdown filters)
   const statusSet = (
@@ -326,7 +362,7 @@ export default function Tasks() {
       (t.assigned_user_names || []).some(n => n.toLowerCase().includes(s)) ||
       (t.assigned_employee_names || []).some(n => n.toLowerCase().includes(s)) ||
       (t.assigned_team_names || []).some(n => n.toLowerCase().includes(s));
-    const effStatus = getEffectiveStatus(t);
+    const effStatus = getDisplayStatus(t);
     const matchStatus =
       filterStatus === "all" ||
       filterStatus === "recurring" ||
@@ -494,7 +530,7 @@ export default function Tasks() {
 
   const handleStatusChange = async (taskId, newStatus) => {
     const oldTask = tasks.find(t => t.id === taskId);
-    const oldStatus = getEffectiveStatus(oldTask);
+    const oldStatus = getDisplayStatus(oldTask);
     await base44.entities.Task.update(taskId, { status: newStatus });
     const userName = currentUser?.full_name || currentUser?.email || "Unknown";
     await logTaskHistory({
@@ -507,7 +543,7 @@ export default function Tasks() {
     setTasks(prev => prev.map(t => {
       if (t.id !== taskId) return t;
       const updated = { ...t, status: newStatus };
-      return { ...updated, status: getEffectiveStatus(updated) };
+      return { ...updated, status: getDisplayStatus(updated) };
     }));
     setHistoryRefresh(r => r + 1);
   };
@@ -549,7 +585,7 @@ export default function Tasks() {
       { key: "title", label: "Title" },
       { key: "description", label: "Description" },
       { key: "category", label: "Category" },
-      { key: r => getEffectiveStatus(r), label: "Status" },
+      { key: r => getDisplayStatus(r), label: "Status" },
       { key: "priority", label: "Priority" },
       { key: "work_order_name", label: "Work Order" },
       { key: "project_name", label: "Project" },
@@ -557,6 +593,16 @@ export default function Tasks() {
       { key: "asset_name", label: "Asset" },
       { key: r => (r.assigned_employee_names || []).join("; "), label: "Assigned Employees" },
       { key: r => (r.assigned_user_names || []).join("; "), label: "Assigned Users" },
+      { key: r => {
+          const subs = subtasksMap[r.id] || [];
+          if (subs.length === 0) return "";
+          return subs.map(s => `${s.done ? "[x]" : "[ ]"} ${s.title}`).join(" | ");
+        }, label: "Subtasks" },
+      { key: r => {
+          const subs = subtasksMap[r.id] || [];
+          if (subs.length === 0) return "";
+          return `${subs.filter(s => s.done).length}/${subs.length}`;
+        }, label: "Subtasks Progress" },
       { key: "planning_date", label: "Planning Date" },
       { key: "planning_time_in", label: "Time In" },
       { key: "planning_time_out", label: "Time Out" },
@@ -571,9 +617,9 @@ export default function Tasks() {
 
   const stats = [
     { label: "Total",     value: tasks.length,                                        color: "text-foreground" },
-    { label: "Queued",    value: tasks.filter(t => getEffectiveStatus(t) === "Queued").length,     color: "text-amber-600" },
-    { label: "Not Completed", value: tasks.filter(t => { const s = getEffectiveStatus(t); return s === "Not Completed" || s === "Active"; }).length, color: "text-orange-600" },
-    { label: "Completed", value: tasks.filter(t => getEffectiveStatus(t) === "Completed").length,  color: "text-emerald-600" },
+    { label: "Queued",    value: tasks.filter(t => getDisplayStatus(t) === "Queued").length,     color: "text-amber-600" },
+    { label: "Not Completed", value: tasks.filter(t => { const s = getDisplayStatus(t); return s === "Not Completed" || s === "Active"; }).length, color: "text-orange-600" },
+    { label: "Completed", value: tasks.filter(t => getDisplayStatus(t) === "Completed").length,  color: "text-emerald-600" },
   ];
 
   return (
@@ -582,6 +628,7 @@ export default function Tasks() {
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/operations-overview" />
           <div className="p-2.5 rounded-xl bg-primary/10">
             <CheckSquare className="w-5 h-5 text-primary" />
           </div>
@@ -616,11 +663,11 @@ export default function Tasks() {
         {[
           { key: "all",       label: "All",       count: regularTasks.length },
           { key: "templates", label: "Templates", count: templateTasks.length, iconTemplate: true },
-          { key: "Queued",    label: "Queued",    count: regularTasks.filter(t => getEffectiveStatus(t) === "Queued").length  },
+          { key: "Queued",    label: "Queued",    count: regularTasks.filter(t => getDisplayStatus(t) === "Queued").length  },
           { key: "scheduled", label: "Scheduled", count: plannedTasks.length, iconPlanned: true },
-          { key: "Active",    label: "Not Completed", count: regularTasks.filter(t => { const s = getEffectiveStatus(t); return s === "Not Completed" || s === "Active"; }).length },
-          { key: "Completed", label: "Completed", count: regularTasks.filter(t => getEffectiveStatus(t) === "Completed").length },
-          { key: "Archived", label: "Archived", count: regularTasks.filter(t => getEffectiveStatus(t) === "Archived").length, iconArchive: true },
+          { key: "Active",    label: "Not Completed", count: regularTasks.filter(t => { const s = getDisplayStatus(t); return s === "Not Completed" || s === "Active"; }).length },
+          { key: "Completed", label: "Completed", count: regularTasks.filter(t => getDisplayStatus(t) === "Completed").length },
+          { key: "Archived", label: "Archived", count: regularTasks.filter(t => getDisplayStatus(t) === "Archived").length, iconArchive: true },
           { key: "recurring", label: "Recurring", count: recurringTemplates.length, icon: true },
         ].filter(tab => tab.key === "all" || tab.count > 0).map(tab => (
           <button key={tab.key} onClick={() => setFilterStatus(tab.key)}
@@ -702,7 +749,7 @@ export default function Tasks() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -719,7 +766,7 @@ export default function Tasks() {
                   {vis.has("work_order") && <SortableTh label="WO / Project / Client" sortKey="work_order" currentKey={sortKey} dir={sortDir} onSort={handleSort} className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell" />}
                   {vis.has("subtasks") && <th className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Subtasks</th>}
                   {vis.has("reports") && <th className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Reports</th>}
-                  <SortableTh label="Created" sortKey="created" currentKey={sortKey} dir={sortDir} onSort={handleSort} className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell whitespace-nowrap" />
+                  <SortableTh label="Time Summary" sortKey="created" currentKey={sortKey} dir={sortDir} onSort={handleSort} className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell whitespace-nowrap" />
                   <SortableTh label="Status" sortKey="status" currentKey={sortKey} dir={sortDir} onSort={handleSort} className="px-2 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24 whitespace-nowrap" />
                   <th className="px-2 py-2.5 w-16"></th>
                 </tr>
@@ -851,23 +898,45 @@ export default function Tasks() {
                           </td>
                           )}
 
-                          {/* Created date */}
-                          <td className="px-2 py-2.5 hidden md:table-cell whitespace-nowrap text-xs text-muted-foreground">
-                            {fmtDate(t.created_date)}
+                          {/* Time Summary: Created / Completed / Total Time */}
+                          <td className="px-2 py-2.5 hidden md:table-cell whitespace-nowrap">
+                            {(() => {
+                              const { completedDate, totalMinutes } = getTimeSummary(timeEntriesMap[t.id] || []);
+                              return (
+                                <div className="flex flex-col gap-0.5 text-xs">
+                                  <span className="text-muted-foreground leading-tight">
+                                    <span className="text-muted-foreground/60">Created:</span> {fmtDate(t.created_date)}
+                                  </span>
+                                  <span className="text-muted-foreground leading-tight">
+                                    <span className="text-muted-foreground/60">Completed:</span> {fmtDate(completedDate)}
+                                  </span>
+                                  <span className="font-medium text-foreground leading-tight">
+                                    <span className="text-muted-foreground/60 font-normal">Total:</span> {fmtDuration(totalMinutes)}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </td>
 
                           {/* Status */}
                           <td className="px-2 py-2.5">
-                            <StatusToggle
-                              status={getEffectiveStatus(t)}
-                              canEdit={canEditTasks}
-                              statuses={statuses}
-                              onToggle={() => {
-                                const eff = getEffectiveStatus(t);
-                                const newStatus = eff === "Completed" ? "Not Completed" : "Completed";
-                                handleStatusChange(t.id, newStatus);
-                              }}
-                            />
+                            {t.is_recurring ? (
+                              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 flex items-center gap-1 w-fit">
+                                <RefreshCw className="w-3 h-3" />
+                                Recurring
+                              </span>
+                            ) : (
+                              <StatusToggle
+                                status={getDisplayStatus(t)}
+                                canEdit={canEditTasks}
+                                statuses={statuses}
+                                onToggle={() => {
+                                  const eff = getDisplayStatus(t);
+                                  const newStatus = eff === "Completed" ? "Not Completed" : "Completed";
+                                  handleStatusChange(t.id, newStatus);
+                                }}
+                              />
+                            )}
                           </td>
 
                           {/* Actions */}
@@ -876,13 +945,13 @@ export default function Tasks() {
                             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(t)}>
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
-                            {getEffectiveStatus(t) === "Archived" && (
+                            {getDisplayStatus(t) === "Archived" && (
                               <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-500 hover:text-slate-700" title="Restore (unarchive)"
                                 onClick={() => handleStatusChange(t.id, "Queued")}>
                                 <ArchiveRestore className="w-3.5 h-3.5" />
                               </Button>
                             )}
-                            {getEffectiveStatus(t) === "Template" && (
+                            {getDisplayStatus(t) === "Template" && (
                               <Button size="icon" variant="ghost" className="h-7 w-7 text-cyan-600 hover:text-cyan-700" title="Create task from template" onClick={() => handleUseTemplate(t)}>
                                 <Sparkles className="w-3.5 h-3.5" />
                               </Button>

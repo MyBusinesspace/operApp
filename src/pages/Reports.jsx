@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FileText, TrendingUp, Scale, BarChart3, Clock, CheckCircle2, ChevronDown, ChevronRight, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 
 const SECTIONS = [
   {
@@ -66,9 +67,12 @@ export default function Reports() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Reports</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Financial statements, aging analysis and reconciliation reports</p>
+      <div className="flex items-center gap-3">
+        <BackToOverviewButton to="/finance-overview" />
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Reports</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Financial statements, aging analysis and reconciliation reports</p>
+        </div>
       </div>
 
       {SECTIONS.map(section => {

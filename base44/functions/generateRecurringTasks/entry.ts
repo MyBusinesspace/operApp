@@ -46,6 +46,8 @@ function resolvePlaceholders(title, date) {
   const year = d.getFullYear();
   const week = `W${Math.ceil(d.getDate() / 7)}`;
   return title
+    .replace(/\[Month Name\]/g, month)
+    .replace(/\[MonthName\]/g, month)
     .replace(/\[Month\]/g, month)
     .replace(/\[Week\]/g, week)
     .replace(/\[Year\]/g, String(year))

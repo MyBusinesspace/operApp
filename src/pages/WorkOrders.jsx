@@ -11,6 +11,7 @@ import { exportToCSV } from "@/lib/csvExport";
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import WorkOrderFormModal from "@/components/workorders/WorkOrderFormModal";
@@ -220,6 +221,7 @@ export default function WorkOrders() {
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/operations-overview" />
           <div className="p-2.5 rounded-xl bg-primary/10">
             <ClipboardList className="w-5 h-5 text-primary" />
           </div>
@@ -323,7 +325,7 @@ export default function WorkOrders() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

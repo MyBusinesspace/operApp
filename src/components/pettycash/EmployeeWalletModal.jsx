@@ -46,6 +46,10 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
       didChangeRef.current = false;
       load();
     }
+    if (!open) {
+      setEntries([]);
+      setReceiptViewer(null);
+    }
   }, [open, employee]);
 
   const handleUploadReceiptForEntry = async (entryId, file) => {
@@ -270,38 +274,40 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
       </Dialog>
 
       {/* Receipt Viewer */}
-      {receiptViewer && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70" onClick={() => setReceiptViewer(null)}>
-          <div className="bg-card rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <p className="font-semibold text-sm">{receiptViewer.provider || "Receipt"} — {fmtDate(receiptViewer.date)}</p>
-              <div className="flex gap-2 items-center">
-                {/* Replace / add photo */}
-                <label className={`flex items-center gap-1 h-7 px-2 rounded-md border border-border text-xs font-medium cursor-pointer hover:bg-muted transition-colors ${uploadingDoc === receiptViewer.id ? "opacity-50 pointer-events-none" : ""}`}>
-                  {uploadingDoc === receiptViewer.id
-                    ? <><Loader2 className="w-3 h-3 animate-spin" /> Uploading...</>
-                    : <><Upload className="w-3 h-3" /> {receiptViewer.receipt_url ? "Replace" : "Upload photo"}</>}
-                  <input type="file" accept="image/*,application/pdf" className="hidden"
-                    onChange={e => handleUploadReceiptForEntry(receiptViewer.id, e.target.files?.[0])} />
-                </label>
-                <a href={receiptViewer.receipt_url} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Eye className="w-3 h-3" /> View full</Button>
-                </a>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setReceiptViewer(null)}>
-                  <X className="w-4 h-4" />
-                </Button>
+      <Dialog open={!!receiptViewer} onOpenChange={(open) => { if (!open) setReceiptViewer(null); }}>
+        <DialogContent className="max-w-2xl p-0 gap-0 z-[80]" hideClose>
+          {receiptViewer && (
+            <>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <p className="font-semibold text-sm">{receiptViewer.provider || "Receipt"} — {fmtDate(receiptViewer.date)}</p>
+                <div className="flex gap-2 items-center">
+                  {/* Replace / add photo */}
+                  <label className={`flex items-center gap-1 h-7 px-2 rounded-md border border-border text-xs font-medium cursor-pointer hover:bg-muted transition-colors ${uploadingDoc === receiptViewer.id ? "opacity-50 pointer-events-none" : ""}`}>
+                    {uploadingDoc === receiptViewer.id
+                      ? <><Loader2 className="w-3 h-3 animate-spin" /> Uploading...</>
+                      : <><Upload className="w-3 h-3" /> {receiptViewer.receipt_url ? "Replace" : "Upload photo"}</>}
+                    <input type="file" accept="image/*,application/pdf" className="hidden"
+                      onChange={e => handleUploadReceiptForEntry(receiptViewer.id, e.target.files?.[0])} />
+                  </label>
+                  <a href={receiptViewer.receipt_url} target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Eye className="w-3 h-3" /> View full</Button>
+                  </a>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setReceiptViewer(null)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="p-4 flex items-center justify-center bg-muted/20 min-h-[300px]">
-              {receiptViewer.receipt_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                <img src={receiptViewer.receipt_url} alt="Receipt" className="max-w-full max-h-[60vh] object-contain rounded-lg" />
-              ) : (
-                <iframe src={receiptViewer.receipt_url} className="w-full h-[60vh] rounded-lg border border-border" title="Receipt" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="p-4 flex items-center justify-center bg-muted/20 min-h-[300px]">
+                {receiptViewer.receipt_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                  <img key={receiptViewer.id} src={receiptViewer.receipt_url} alt="Receipt" className="max-w-full max-h-[60vh] object-contain rounded-lg" />
+                ) : (
+                  <iframe key={receiptViewer.id} src={receiptViewer.receipt_url} className="w-full h-[60vh] rounded-lg border border-border" title="Receipt" />
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <PettyCashEntryModal
         open={entryModal}

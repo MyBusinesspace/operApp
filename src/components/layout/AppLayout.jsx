@@ -5,6 +5,7 @@ import QuickFinder from "./QuickFinder";
 import { usePermissionsMatrix } from "@/hooks/usePermissionsMatrix";
 import { pathToModule } from "@/lib/permissionMap";
 import { Lock } from "lucide-react";
+import { GoogleDriveExportProvider } from "@/lib/GoogleDriveExportContext";
 
 export default function AppLayout() {
   const { pathname } = useLocation();
@@ -30,20 +31,22 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopNavBar />
-      <QuickFinder />
-      <main className="pt-[var(--nav-height)]">
-        {isAccounting ? (
-          <div className="h-[calc(100vh-var(--nav-height))] overflow-auto">
-            {content}
-          </div>
-        ) : (
-          <div className="max-w-[1440px] mx-auto px-4 lg:px-6 py-6">
-            {content}
-          </div>
-        )}
-      </main>
-    </div>
+    <GoogleDriveExportProvider>
+      <div className="min-h-screen bg-background">
+        <TopNavBar />
+        <QuickFinder />
+        <main className="pt-[var(--nav-height)]">
+          {isAccounting ? (
+            <div className="h-[calc(100vh-var(--nav-height))] overflow-auto">
+              {content}
+            </div>
+          ) : (
+            <div className="max-w-[1440px] mx-auto px-4 lg:px-6 py-6">
+              {content}
+            </div>
+          )}
+        </main>
+      </div>
+    </GoogleDriveExportProvider>
   );
 }

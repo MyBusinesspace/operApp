@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCurrentEmployee } from "@/hooks/useCurrentEmployee";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import {
   Wallet, Search, X, Users, TrendingDown, TrendingUp,
@@ -98,6 +99,7 @@ export default function PettyCash() {
       <div className="bg-card border-b border-border px-6 pt-5 pb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
+            <BackToOverviewButton to="/finance-overview" />
             <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
               <Wallet className="w-5 h-5 text-amber-600" />
             </div>
@@ -220,6 +222,7 @@ export default function PettyCash() {
         ) : (
           /* TABLE VIEW */
           <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="scrollable-table">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -281,9 +284,10 @@ export default function PettyCash() {
                 })}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
+            </div>
+            </div>
+            )}
+            </div>
 
       <DataTablePagination pagination={pagination} />
 

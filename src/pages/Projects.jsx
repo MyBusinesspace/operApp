@@ -10,6 +10,7 @@ import {
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -233,9 +234,12 @@ export default function Projects() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track rentals, installations & project scopes</p>
+        <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/business-overview" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Projects</h1>
+            <p className="text-sm text-muted-foreground mt-1">Track rentals, installations & project scopes</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <label className="cursor-pointer">
@@ -333,7 +337,7 @@ export default function Projects() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-hidden">
+          <div className="overflow-x-hidden scrollable-table">
             <table className="w-full table-fixed">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

@@ -3,7 +3,7 @@ import { isToday, format } from "date-fns";
 import { Plus, Check, ChevronDown, ChevronRight } from "lucide-react";
 import TaskCard from "./TaskCard";
 
-export default function PlannerDayColumn({ date, tasks, employees = [], timeEntries = [], subtasksMap = {}, onTaskClick, onTaskDragStart, onTaskDrop, onAddTask, onTaskDelete, onUpdateWorkers, collapseCompleted = false }) {
+export default function PlannerDayColumn({ date, tasks, employees = [], timeEntries = [], subtasksMap = {}, onTaskClick, onTaskDragStart, onTaskDrop, onAddTask, onTaskDelete, onUpdateWorkers, onComplete, collapseCompleted = false }) {
   const isCurrentDay = isToday(date);
   const [isDragOver, setIsDragOver] = useState(false);
   const [expandedCompleted, setExpandedCompleted] = useState(false);
@@ -54,6 +54,7 @@ export default function PlannerDayColumn({ date, tasks, employees = [], timeEntr
               onClick={() => onTaskClick && onTaskClick(task)}
               onDelete={onTaskDelete}
               onUpdateWorkers={onUpdateWorkers}
+              onComplete={onComplete}
               subtasks={subtasksMap[task.id] || []}
               onDragStart={onTaskDragStart}
               taskIndex={idx + 1}

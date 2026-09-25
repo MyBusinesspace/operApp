@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { withRetry, batchedAll, debounce } from "@/lib/apiHelpers";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -312,9 +313,12 @@ export default function Timesheets() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Timesheets</h1>
-          <p className="text-sm text-muted-foreground">Track employee clock-in/out against tasks</p>
+        <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/operations-overview" />
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Timesheets</h1>
+            <p className="text-sm text-muted-foreground">Track employee clock-in/out against tasks</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={exportCSV} disabled={filtered.length === 0}>
@@ -452,7 +456,7 @@ export default function Timesheets() {
                 <span className="text-xs font-bold text-foreground ml-auto">{uniqueWorkers}</span>
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollable-table">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/10">

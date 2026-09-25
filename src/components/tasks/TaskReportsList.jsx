@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Eye, Clock, Printer, Loader2 } from "lucide-react";
+import { FileText, Eye, Clock, Printer, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { buildWorkingReportPages } from "@/components/timesheets/WorkingReportPrint";
@@ -17,7 +17,7 @@ function fmtDuration(mins) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-export default function TaskReportsList({ taskId, onViewReport }) {
+export default function TaskReportsList({ taskId, onViewReport, onEditReport, refreshKey = 0 }) {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -27,7 +27,7 @@ export default function TaskReportsList({ taskId, onViewReport }) {
     base44.entities.WorkingReport.filter({ task_id: taskId }, "-clock_in_time")
       .then(r => { setReports(r || []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId, refreshKey]);
 
   const toggleOne = (id) => {
     setSelectedIds(prev => {
@@ -171,6 +171,12 @@ export default function TaskReportsList({ taskId, onViewReport }) {
                 title="View report"
                 className="p-1 rounded text-muted-foreground/50 hover:text-primary transition-colors">
                 <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onEditReport ? onEditReport(report) : onViewReport(report)}
+                title="Edit report"
+                className="p-1 rounded text-muted-foreground/50 hover:text-primary transition-colors">
+                <Pencil className="w-4 h-4" />
               </button>
             </div>
           </div>

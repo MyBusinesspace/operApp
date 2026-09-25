@@ -30,6 +30,8 @@
   "EmployeeRole": "employee_role",
   "EmployeeStatus": "employee_status",
   "FileType": "file_type",
+  "GoogleDriveExportRun": "google_drive_export_run",
+  "GoogleDriveExportState": "google_drive_export_state",
   "HistoricalPayment": "historical_payment",
   "Invoice": "invoice",
   "JournalEntry": "journal_entry",

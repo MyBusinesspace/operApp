@@ -6,7 +6,7 @@ import PlannerDayColumn from "./PlannerDayColumn";
 export default function PlannerRow({
   entity, tasks, weekStart, viewBy,
   employees = [], timeEntries = [],
-  onTaskClick, onTaskDragStart, onTaskDrop, onAddTask, onTaskDelete, onUpdateWorkers, subtasksMap = {},
+  onTaskClick, onTaskDragStart, onTaskDrop, onAddTask, onTaskDelete, onUpdateWorkers, onComplete, subtasksMap = {},
   // Row reordering
   isRowDragging, isRowDragOver, onRowDragStart, onRowDragEnd, onRowDragOver, onRowDrop,
   // Avatar drag-to-reassign
@@ -151,6 +151,7 @@ export default function PlannerRow({
             onTaskClick={onTaskClick}
             onTaskDelete={onTaskDelete}
             onUpdateWorkers={onUpdateWorkers}
+            onComplete={onComplete}
             subtasksMap={subtasksMap}
             onTaskDragStart={onTaskDragStart}
             onTaskDrop={(newDate) => onTaskDrop && onTaskDrop(newDate, entity)}

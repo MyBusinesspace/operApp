@@ -84,51 +84,65 @@ export default function ContactDetail() {
   const [contactFiles, setContactFiles] = useState([]);
   const [contactPersons, setContactPersons] = useState([]);
 
+  const withRetry = async (fn, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try { return await fn(); }
+      catch (e) {
+        if (i === retries - 1 || !String(e?.message || e).match(/rate limit/i)) throw e;
+        await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+    }
+  };
+
   const load = async () => {
     setLoading(true);
-    const [c, g] = await Promise.all([
-      base44.entities.Contact.filter({ id }),
-      base44.entities.ContactGroup.list("name", 200),
-    ]);
-    const found = Array.isArray(c) ? c[0] : c;
-    setContact(found || null);
-    setGroups(g);
-
-    // Load related entities in parallel - gracefully handle missing entities
     try {
-      const results = await Promise.allSettled([
-        base44.entities.Invoice?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.Bill?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.Payment?.filter({ contact_id: id, direction: "sent" }) || Promise.resolve([]),
-        base44.entities.Payment?.filter({ contact_id: id, direction: "received" }) || Promise.resolve([]),
-        base44.entities.Project?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.WorkOrder?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.Task?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.Asset?.filter({ contact_id: id }) || Promise.resolve([]),
-        base44.entities.Quote?.filter({ contact_id: id }) || Promise.resolve([]),
+      const [c, g] = await Promise.all([
+        withRetry(() => base44.entities.Contact.filter({ id })),
+        withRetry(() => base44.entities.ContactGroup.list("name", 200)),
       ]);
-      setQuotes(results[8].status === "fulfilled" ? results[8].value || [] : []);
-      setInvoices(results[0].status === "fulfilled" ? results[0].value || [] : []);
-      setBills(results[1].status === "fulfilled" ? results[1].value || [] : []);
-      setMoneySent(results[2].status === "fulfilled" ? results[2].value || [] : []);
-      setMoneyReceived(results[3].status === "fulfilled" ? results[3].value || [] : []);
-      setProjects(results[4].status === "fulfilled" ? results[4].value || [] : []);
-      setWorkOrders(results[5].status === "fulfilled" ? results[5].value || [] : []);
-      setTasks(results[6].status === "fulfilled" ? results[6].value || [] : []);
-      setAssets(results[7].status === "fulfilled" ? results[7].value || [] : []);
-    } catch (_) {}
+      const found = Array.isArray(c) ? c[0] : c;
+      setContact(found || null);
+      setGroups(g);
 
-    // Notes, Files & Contact Persons
-    const [n, f, cp] = await Promise.all([
-      base44.entities.ContactNote.filter({ contact_id: id }),
-      base44.entities.SharedFile.filter({ contact_id: id }),
-      base44.entities.ContactPerson.filter({ contact_id: id }),
-    ]);
-    setNotes(n || []);
-    setContactFiles(f || []);
-    setContactPersons(cp || []);
+      // Load related entities in parallel - gracefully handle missing entities
+      try {
+        const results = await Promise.allSettled([
+          withRetry(() => base44.entities.Invoice?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.Bill?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.Payment?.filter({ contact_id: id, direction: "sent" })).catch(() => []),
+          withRetry(() => base44.entities.Payment?.filter({ contact_id: id, direction: "received" })).catch(() => []),
+          withRetry(() => base44.entities.Project?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.WorkOrder?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.Task?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.Asset?.filter({ contact_id: id })).catch(() => []),
+          withRetry(() => base44.entities.Quote?.filter({ contact_id: id })).catch(() => []),
+        ]);
+        setQuotes(results[8].status === "fulfilled" ? results[8].value || [] : []);
+        setInvoices(results[0].status === "fulfilled" ? results[0].value || [] : []);
+        setBills(results[1].status === "fulfilled" ? results[1].value || [] : []);
+        setMoneySent(results[2].status === "fulfilled" ? results[2].value || [] : []);
+        setMoneyReceived(results[3].status === "fulfilled" ? results[3].value || [] : []);
+        setProjects(results[4].status === "fulfilled" ? results[4].value || [] : []);
+        setWorkOrders(results[5].status === "fulfilled" ? results[5].value || [] : []);
+        setTasks(results[6].status === "fulfilled" ? results[6].value || [] : []);
+        setAssets(results[7].status === "fulfilled" ? results[7].value || [] : []);
+      } catch (_) {}
 
-    setLoading(false);
+      // Notes, Files & Contact Persons
+      const [n, f, cp] = await Promise.all([
+        withRetry(() => base44.entities.ContactNote.filter({ contact_id: id })),
+        withRetry(() => base44.entities.SharedFile.filter({ contact_id: id })),
+        withRetry(() => base44.entities.ContactPerson.filter({ contact_id: id })),
+      ]);
+      setNotes(n || []);
+      setContactFiles(f || []);
+      setContactPersons(cp || []);
+    } catch (e) {
+      console.error("Failed to load contact detail:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [id]);
@@ -150,7 +164,8 @@ export default function ContactDetail() {
       history: notes.length,
       files: contactFiles.length,
     };
-    const visible = TABS.filter(t => t.id === "all" || (counts[t.id] ?? 0) > 0);
+    const alwaysVisible = ["all", "files", "history", "contact_persons"];
+    const visible = TABS.filter(t => alwaysVisible.includes(t.id) || (counts[t.id] ?? 0) > 0);
     if (!visible.find(t => t.id === tab)) setTab("all");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, quotes.length, invoices.length, bills.length, moneySent.length, moneyReceived.length, projects.length, workOrders.length, tasks.length, assets.length, contactPersons.length, notes.length, contactFiles.length]);
@@ -234,7 +249,8 @@ export default function ContactDetail() {
     files: contactFiles.length,
   };
 
-  const visibleTabs = TABS.filter(t => t.id === "all" || (tabCounts[t.id] ?? 0) > 0);
+  const alwaysVisible = ["all", "files", "history", "contact_persons"];
+  const visibleTabs = TABS.filter(t => alwaysVisible.includes(t.id) || (tabCounts[t.id] ?? 0) > 0);
 
   return (
     <div className="space-y-6">

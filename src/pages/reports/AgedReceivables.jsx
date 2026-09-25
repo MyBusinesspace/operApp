@@ -71,7 +71,7 @@ export default function AgedReceivables() {
       {loading ? (
         <div className="py-20 text-center text-muted-foreground text-sm">Loading…</div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden scrollable-table">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-muted/50 border-b border-border">

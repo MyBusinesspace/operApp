@@ -8,6 +8,7 @@ import {
   Upload, Download, Square, CheckSquare, Merge
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -61,15 +62,30 @@ export default function Contacts() {
   const [editingGroup, setEditingGroup] = useState(null);
   const [expandedGroups, setExpandedGroups] = useState({});
 
+  const withRetry = async (fn, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try { return await fn(); }
+      catch (e) {
+        if (i === retries - 1 || !String(e?.message || e).match(/rate limit/i)) throw e;
+        await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+    }
+  };
+
   const load = async () => {
     setLoading(true);
-    const [c, g] = await Promise.all([
-      base44.entities.Contact.list("-created_date", 500),
-      base44.entities.ContactGroup.list("name", 200),
-    ]);
-    setContacts(c);
-    setGroups(g);
-    setLoading(false);
+    try {
+      const [c, g] = await Promise.all([
+        withRetry(() => base44.entities.Contact.list("-created_date", 500)),
+        withRetry(() => base44.entities.ContactGroup.list("name", 200)),
+      ]);
+      setContacts(c);
+      setGroups(g);
+    } catch (e) {
+      console.error("Failed to load contacts:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -353,9 +369,12 @@ export default function Contacts() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Companies</h1>
-          <p className="text-sm text-muted-foreground mt-1">Customers, providers & company groups</p>
+        <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/business-overview" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.02em" }}>Companies</h1>
+            <p className="text-sm text-muted-foreground mt-1">Customers, providers & company groups</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Import */}
@@ -484,7 +503,7 @@ export default function Contacts() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

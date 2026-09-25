@@ -5,6 +5,7 @@
 import { jsPDF } from "jspdf";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
+import { getEffectiveStatus } from "@/lib/taskStatus";
 
 function hexToRgb(hex) {
   const h = (hex || "#cc0000").replace("#", "");
@@ -213,7 +214,7 @@ async function _buildReport({ template, entry, task, pdf }) {
   y += 8;
 
   // Report title (left) + status badge (right) on the same line
-  const isCompleted = task?.status === "Completed";
+  const isCompleted = getEffectiveStatus(task || {}, entry ? [entry] : [], task?.subtasks || []) === "Completed";
   const reportTitle = t.report_title || "SERVICE & MAINTENANCE REPORT";
   textDark();
   pdf.setFontSize(13);

@@ -521,7 +521,7 @@ export default function Quotes() {
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollable-table">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">

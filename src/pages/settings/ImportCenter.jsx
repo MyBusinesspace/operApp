@@ -84,8 +84,8 @@ const ENTITIES = [
     icon: ClipboardList,
     desc: "Tasks linked to work orders & projects",
     color: "bg-rose-50 text-rose-600",
-    templateHeaders: ["title", "status", "category", "work_order_name", "project_name", "contact_name", "planning_date", "planning_time_in", "planning_time_out", "priority", "notes"],
-    templateSample: ["Inspect hoist mechanism", "Queued", "Inspection", "Monthly Maintenance WO", "Tower Crane Rental", "Acme Corp", "2026-06-15", "08:00", "12:00", "High", ""],
+    templateHeaders: ["title", "description", "status", "category", "work_order_name", "project_name", "contact_name", "asset_name", "assigned_employee_names", "planning_date", "planning_time_in", "planning_time_out", "priority", "location_address", "notes", "_subtasks"],
+    templateSample: ["Inspect hoist mechanism", "Quarterly preventive maintenance of HVAC units", "Queued", "Inspection", "Monthly Maintenance WO", "Tower Crane Rental", "Acme Corp", "Unit #A42", "John Smith; Jane Doe", "2026-06-15", "08:00", "12:00", "High", "Dubai Marina Site A", "Client requests extra attention to Unit #A42", "[ ] Check filters | [ ] Clean coils | [x] Test thermostat"],
   },
   {
     key: "TimeEntry",
@@ -470,7 +470,7 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
 
       // Pre-load contacts for name→id lookup (used by Project, WorkOrder & BankTransaction)
       let contactsByName = {}; // normalized name → { id, full_name }
-      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "BankTransaction") {
+      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "Task" || entity.key === "BankTransaction") {
         try {
           const allContacts = await base44.entities.Contact.list("-created_date", 100000);
           allContacts.forEach(c => {
@@ -481,7 +481,7 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
       }
       // Pre-load projects for name→id lookup (used by WorkOrder)
       let projectsByName = {};
-      if (entity.key === "WorkOrder") {
+      if (entity.key === "WorkOrder" || entity.key === "Task") {
         try {
           const allProjects = await base44.entities.Project.list("-created_date", 100000);
           allProjects.forEach(p => {
@@ -514,12 +514,34 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
       }
       // Pre-load employees for name→id lookup (used by TimeEntry)
       let employeesByName = {};
-      if (entity.key === "TimeEntry") {
+      if (entity.key === "TimeEntry" || entity.key === "Task") {
         try {
           const allEmployees = await base44.entities.Employee.list("-created_date", 100000);
           allEmployees.forEach(e => {
             const key = (e.full_name || "").trim().toLowerCase();
             if (key) employeesByName[key] = e;
+          });
+        } catch {}
+      }
+      // Pre-load work orders for name→id lookup (used by Task)
+      let workOrdersByName = {};
+      if (entity.key === "Task") {
+        try {
+          const allWOs = await base44.entities.WorkOrder.list("-created_date", 100000);
+          allWOs.forEach(w => {
+            const key = (w.title || "").trim().toLowerCase();
+            if (key) workOrdersByName[key] = w;
+          });
+        } catch {}
+      }
+      // Pre-load assets for name→id lookup (used by Task)
+      let assetsByName = {};
+      if (entity.key === "Task") {
+        try {
+          const allAssets = await base44.entities.Asset.list("-created_date", 100000);
+          allAssets.forEach(a => {
+            const key = (a.name || "").trim().toLowerCase();
+            if (key) assetsByName[key] = a;
           });
         } catch {}
       }
@@ -659,7 +681,7 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
       let imported = 0, failed = [];
 
       // Projects, WorkOrders, BankAccounts, BankTransactions & TimeEntries: one-by-one to resolve links
-      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "BankAccount" || entity.key === "BankTransaction" || entity.key === "TimeEntry") {
+      if (entity.key === "Project" || entity.key === "WorkOrder" || entity.key === "Task" || entity.key === "BankAccount" || entity.key === "BankTransaction" || entity.key === "TimeEntry") {
         for (let i = 0; i < rows.length; i++) {
           const record = buildRecord(rows[i]);
           if (!passesRequired(record)) { setProgress(Math.round(((i + 1) / rows.length) * 100)); continue; }
@@ -678,6 +700,38 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
           if (entity.key === "WorkOrder" && record.project_name) {
             const proj = projectsByName[record.project_name.trim().toLowerCase()];
             if (proj) { record.project_id = proj.id; record.project_name = proj.name; }
+          }
+          // Task: resolve work order by name
+          if (entity.key === "Task" && record.work_order_name) {
+            const wo = workOrdersByName[record.work_order_name.trim().toLowerCase()];
+            if (wo) { record.work_order_id = wo.id; record.work_order_name = wo.title; }
+          }
+          // Task: resolve project by name
+          if (entity.key === "Task" && record.project_name) {
+            const proj = projectsByName[record.project_name.trim().toLowerCase()];
+            if (proj) { record.project_id = proj.id; record.project_name = proj.name; }
+          }
+          // Task: resolve asset by name
+          if (entity.key === "Task" && record.asset_name) {
+            const asset = assetsByName[record.asset_name.trim().toLowerCase()];
+            if (asset) { record.asset_id = asset.id; record.asset_name = asset.name; }
+          }
+          // Task: resolve assigned employees by name (semicolon-separated)
+          if (entity.key === "Task" && record.assigned_employee_names) {
+            const names = String(record.assigned_employee_names).split(/[;|]/).map(s => s.trim()).filter(Boolean);
+            const ids = []; const resolvedNames = [];
+            for (const n of names) {
+              const emp = employeesByName[n.trim().toLowerCase()];
+              if (emp) { ids.push(emp.id); resolvedNames.push(emp.full_name); }
+            }
+            if (ids.length > 0) { record.assigned_employees = ids; record.assigned_employee_names = resolvedNames; }
+            else { delete record.assigned_employee_names; }
+          }
+          // Task: extract subtasks for post-create
+          let taskSubtaskText = null;
+          if (entity.key === "Task" && record._subtasks) {
+            taskSubtaskText = record._subtasks;
+            delete record._subtasks;
           }
           // TimeEntry: resolve employee by name (required)
           if (entity.key === "TimeEntry" && record.employee_name) {
@@ -708,8 +762,22 @@ function StepPreview({ entity, parseResult, file, onBack, onReset }) {
             }
           }
           try {
-            await entityClient.create(record);
+            const created = await entityClient.create(record);
             imported++;
+            // Task: create subtasks linked to the new task
+            if (entity.key === "Task" && taskSubtaskText && created?.id) {
+              const subs = String(taskSubtaskText).split("|").map(s => s.trim()).filter(Boolean);
+              for (let si = 0; si < subs.length; si++) {
+                let done = false; let subTitle = subs[si];
+                const m = subTitle.match(/^\[(x| )\]\s*(.*)$/i);
+                if (m) { done = m[1].toLowerCase() === "x"; subTitle = m[2].trim(); }
+                if (subTitle) {
+                  try {
+                    await base44.entities.TaskSubtask.create({ task_id: created.id, title: subTitle, done, sort_order: si });
+                  } catch {}
+                }
+              }
+            }
           } catch (err) {
             failed.push(`Row ${i + 1}: ${err.message}`);
           }

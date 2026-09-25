@@ -676,6 +676,19 @@ export default function Planner() {
     }
   };
 
+  const handleCompleteTask = async (task) => {
+    if (!task?.id) return;
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "Completed" } : t));
+    try {
+      await base44.entities.Task.update(task.id, { status: "Completed" });
+      toast({ title: "Task completed", description: `"${task.title}" marked as completed.` });
+    } catch (e) {
+      console.error("Complete task error:", e);
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: task.status } : t));
+      loadData();
+    }
+  };
+
   const handleDeleteTask = async (task) => {
     if (!task?.id) return;
     if (!window.confirm(`Delete "${task.title}"? This will remove it from the planner and the Tasks list.`)) return;
@@ -837,6 +850,11 @@ export default function Planner() {
           setViewBy={setViewBy}
           sortedRows={rows}
           onLeaveIds={onLeaveIds}
+          subtasksMap={subtasksMap}
+          onTaskClick={setQuickEditTask}
+          onTaskDelete={handleDeleteTask}
+          onUpdateWorkers={handleUpdateWorkers}
+          onComplete={handleCompleteTask}
         />
       )}
 
@@ -907,6 +925,7 @@ export default function Planner() {
                 onTaskDrop={handleTaskDrop}
                 onAddTask={(entity, dateStr) => setCellPicker({ entity, dateStr })}
                 onUpdateWorkers={handleUpdateWorkers}
+                onComplete={handleCompleteTask}
                 subtasksMap={subtasksMap}
                 isRowDragging={draggingRowId === entity.id}
                 isRowDragOver={rowDragOverId === entity.id}
@@ -939,6 +958,7 @@ export default function Planner() {
                 onTaskDragStart={handleTaskDragStart}
                 onTaskDrop={handleTaskDrop}
                 onUpdateWorkers={handleUpdateWorkers}
+                onComplete={handleCompleteTask}
                 subtasksMap={subtasksMap}
                 collapseCompleted={collapseCompleted}
               />

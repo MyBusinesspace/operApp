@@ -312,7 +312,10 @@ export async function buildWorkingReportPdf({ template, entry, task, asset, woCo
   y += 8;
 
   // ── Report title (left) + status badge (right) ───────────────────────────────
-  const isCompleted = tk.status === 'Completed';
+  // Effective status: a Working Report exists (we are rendering one), so the
+// badge reflects subtask completion — matching the Tasks table display logic.
+const _wrSubtasks = tk.subtasks || [];
+const isCompleted = _wrSubtasks.length > 0 ? _wrSubtasks.every((s: any) => s.done) : true;
   const reportTitle = t.report_title || 'SERVICE & MAINTENANCE REPORT';
   textDark();
   pdf.setFontSize(13);

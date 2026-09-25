@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, Pencil } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import WorkingReportPreview from "@/components/timesheets/WorkingReportPreview";
+import WorkingReportEditModal from "@/components/tasks/WorkingReportEditModal";
 import { printWorkingReport } from "@/components/timesheets/WorkingReportPrint";
 
 export default function ReportQuickViewModal({ open, onClose, report, task }) {
   const [template, setTemplate] = useState(null);
   const [subtasks, setSubtasks] = useState([]);
   const [printing, setPrinting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [liveReport, setLiveReport] = useState(report);
+
+  useEffect(() => {
+    setLiveReport(report);
+  }, [report?.id, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -27,10 +34,15 @@ export default function ReportQuickViewModal({ open, onClose, report, task }) {
   }, [open, report?.task_id]);
 
   const handlePrint = async () => {
-    if (!report) return;
+    if (!liveReport) return;
     setPrinting(true);
-    await printWorkingReport({ template, entry: { ...report, report_reference: report.reference }, task: { ...task, subtasks } });
+    await printWorkingReport({ template, entry: { ...liveReport, report_reference: liveReport.reference }, task: { ...task, subtasks } });
     setPrinting(false);
+  };
+
+  const handleSaved = (updated) => {
+    setLiveReport(updated);
+    setEditing(false);
   };
 
   return (
@@ -39,21 +51,36 @@ export default function ReportQuickViewModal({ open, onClose, report, task }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border sticky top-0 bg-card z-10">
           <span className="text-sm font-semibold text-foreground">
-            Working Report — {report?.reference || "—"}
+            Working Report — {liveReport?.reference || "—"}
           </span>
-          <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5 px-3" onClick={handlePrint} disabled={printing || !report}>
-            <Printer className="w-3 h-3" />
-            {printing ? "Printing..." : "Print PDF"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5 px-3" onClick={() => setEditing(true)} disabled={!liveReport}>
+              <Pencil className="w-3 h-3" />
+              Edit
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5 px-3" onClick={handlePrint} disabled={printing || !liveReport}>
+              <Printer className="w-3 h-3" />
+              {printing ? "Printing..." : "Print PDF"}
+            </Button>
+          </div>
         </div>
 
         {/* Body */}
         <div className="p-5">
-          {report
-            ? <WorkingReportPreview template={template} entry={report} task={{ ...task, subtasks }} />
+          {liveReport
+            ? <WorkingReportPreview template={template} entry={liveReport} task={{ ...task, subtasks }} />
             : <div className="py-12 text-center text-sm text-muted-foreground">No report selected.</div>
           }
         </div>
+
+        {liveReport && (
+          <WorkingReportEditModal
+            open={editing}
+            onClose={() => setEditing(false)}
+            report={liveReport}
+            onSaved={handleSaved}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

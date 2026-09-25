@@ -394,7 +394,7 @@ export default function BalanceSheet() {
       {loading ? (
         <div className="py-20 text-center text-muted-foreground text-sm">Loading…</div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden overflow-x-auto">
+        <div className="rounded-xl border border-border bg-card overflow-hidden overflow-x-auto scrollable-table">
           {/* Report title block */}
           <div className="px-4 py-4 border-b border-border bg-background">
             <p className="text-lg font-bold text-foreground">Balance Sheet</p>

@@ -4,6 +4,7 @@ import { Plus, Play, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircl
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import PayPeriodFormModal from "@/components/payroll/PayPeriodFormModal";
 import PayrollEntriesInline from "@/components/payroll/PayrollEntriesInline";
 import BulkSalaryEditModal from "@/components/payroll/BulkSalaryEditModal";
@@ -188,9 +189,7 @@ export default function Payroll() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} title="Go back">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <BackToOverviewButton to="/timehr-overview" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">Payroll</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Manage pay periods, review entries, and approve payroll runs</p>

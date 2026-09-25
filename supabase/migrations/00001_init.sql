@@ -1,5 +1,5 @@
 -- Auto-generated from base44/entities — do not edit by hand
--- Regenerated: 2026-09-09T06:52:00.950Z
+-- Regenerated: 2026-09-25T03:09:49.838Z
 -- Tables mirror Base44 entity schemas (field names preserved)
 
 create extension if not exists "pgcrypto";
@@ -256,6 +256,9 @@ create table if not exists public.bill (
   project_name text,
   work_order_id text,
   work_order_name text,
+  task_ids jsonb,
+  task_names jsonb,
+  task_references jsonb,
   purchase_order_id text,
   purchase_order_number text,
   payments jsonb,
@@ -678,6 +681,44 @@ create table if not exists public.file_type (
   description text,
   reference_prefix text DEFAULT '',
   entity_scope text
+);
+
+-- Entity: GoogleDriveExportRun
+create table if not exists public.google_drive_export_run (
+  id text primary key,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by text,
+  created_by_id text,
+  is_sample boolean default false,
+  status text DEFAULT 'running',
+  current_stage text DEFAULT 'init',
+  current_offset double precision DEFAULT 0,
+  current_item text,
+  files_uploaded double precision DEFAULT 0,
+  files_skipped double precision DEFAULT 0,
+  error text
+);
+
+-- Entity: GoogleDriveExportState
+create table if not exists public.google_drive_export_state (
+  id text primary key,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by text,
+  created_by_id text,
+  is_sample boolean default false,
+  entry_type text not null,
+  entity_type text,
+  entity_id text,
+  entity_name text,
+  drive_folder_id text,
+  file_url text,
+  drive_file_id text,
+  run_date text,
+  files_uploaded double precision DEFAULT 0,
+  files_skipped double precision DEFAULT 0,
+  status text
 );
 
 -- Entity: HistoricalPayment
@@ -1849,6 +1890,12 @@ for each row execute function public.set_updated_date();
 drop trigger if exists file_type_set_updated_date on public.file_type;
 create trigger file_type_set_updated_date before update on public.file_type
 for each row execute function public.set_updated_date();
+drop trigger if exists google_drive_export_run_set_updated_date on public.google_drive_export_run;
+create trigger google_drive_export_run_set_updated_date before update on public.google_drive_export_run
+for each row execute function public.set_updated_date();
+drop trigger if exists google_drive_export_state_set_updated_date on public.google_drive_export_state;
+create trigger google_drive_export_state_set_updated_date before update on public.google_drive_export_state
+for each row execute function public.set_updated_date();
 drop trigger if exists historical_payment_set_updated_date on public.historical_payment;
 create trigger historical_payment_set_updated_date before update on public.historical_payment
 for each row execute function public.set_updated_date();
@@ -2054,6 +2101,10 @@ create index if not exists employee_status_created_date_idx on public.employee_s
 create index if not exists employee_status_created_by_id_idx on public.employee_status (created_by_id);
 create index if not exists file_type_created_date_idx on public.file_type (created_date desc);
 create index if not exists file_type_created_by_id_idx on public.file_type (created_by_id);
+create index if not exists google_drive_export_run_created_date_idx on public.google_drive_export_run (created_date desc);
+create index if not exists google_drive_export_run_created_by_id_idx on public.google_drive_export_run (created_by_id);
+create index if not exists google_drive_export_state_created_date_idx on public.google_drive_export_state (created_date desc);
+create index if not exists google_drive_export_state_created_by_id_idx on public.google_drive_export_state (created_by_id);
 create index if not exists historical_payment_created_date_idx on public.historical_payment (created_date desc);
 create index if not exists historical_payment_created_by_id_idx on public.historical_payment (created_by_id);
 create index if not exists invoice_created_date_idx on public.invoice (created_date desc);
@@ -2273,6 +2324,14 @@ create policy employee_status_authenticated_all on public.employee_status
 alter table public.file_type enable row level security;
 drop policy if exists file_type_authenticated_all on public.file_type;
 create policy file_type_authenticated_all on public.file_type
+  for all to authenticated using (true) with check (true);
+alter table public.google_drive_export_run enable row level security;
+drop policy if exists google_drive_export_run_authenticated_all on public.google_drive_export_run;
+create policy google_drive_export_run_authenticated_all on public.google_drive_export_run
+  for all to authenticated using (true) with check (true);
+alter table public.google_drive_export_state enable row level security;
+drop policy if exists google_drive_export_state_authenticated_all on public.google_drive_export_state;
+create policy google_drive_export_state_authenticated_all on public.google_drive_export_state
   for all to authenticated using (true) with check (true);
 alter table public.historical_payment enable row level security;
 drop policy if exists historical_payment_authenticated_all on public.historical_payment;
@@ -2512,6 +2571,8 @@ create policy uploads_authenticated_update on storage.objects
 --   EmployeeRole -> employee_role
 --   EmployeeStatus -> employee_status
 --   FileType -> file_type
+--   GoogleDriveExportRun -> google_drive_export_run
+--   GoogleDriveExportState -> google_drive_export_state
 --   HistoricalPayment -> historical_payment
 --   Invoice -> invoice
 --   JournalEntry -> journal_entry

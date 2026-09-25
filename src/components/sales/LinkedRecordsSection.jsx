@@ -26,13 +26,21 @@ export default function LinkedRecordsSection({ form, onChange, contactId }) {
     Promise.all([
       base44.entities.Project.list("name", 200),
       base44.entities.WorkOrder.list("title", 200),
-      base44.entities.Task.list("title", 200),
-    ]).then(([p, w, t]) => {
+    ]).then(([p, w]) => {
       setProjects(p);
       setWorkOrders(w);
-      setTasks(t);
     });
   }, []);
+
+  // Fetch tasks scoped to the selected project (avoids the 200-record list limit)
+  useEffect(() => {
+    if (!form.project_id) { setTasks([]); return; }
+    const filter = { project_id: form.project_id };
+    if (form.work_order_id) filter.work_order_id = form.work_order_id;
+    base44.entities.Task.filter(filter, "-created_date", 500)
+      .then(t => setTasks(t || []))
+      .catch(() => setTasks([]));
+  }, [form.project_id, form.work_order_id]);
 
   // ── Cascading filters based on contact, project, work order ──────
   // Projects: filter by contact if selected
@@ -47,11 +55,9 @@ export default function LinkedRecordsSection({ form, onChange, contactId }) {
     return true;
   });
 
-  // Tasks: filter by contact AND by project AND by work order if selected
+  // Tasks: already scoped to project/work_order from the API; just apply contact filter
   const availableTasks = tasks.filter(t => {
     if (contactId && t.contact_id !== contactId) return false;
-    if (form.project_id && t.project_id !== form.project_id) return false;
-    if (form.work_order_id && t.work_order_id !== form.work_order_id) return false;
     return true;
   });
 

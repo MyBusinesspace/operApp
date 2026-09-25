@@ -5,7 +5,7 @@ import {
   Settings, Users, FolderKanban, Package, ClipboardList,
   Clock, CalendarDays, UserCheck, CreditCard, FileText,
   ShoppingCart, BarChart3, Building2, Wrench,
-  ChevronRight, Search, FileStack, Shield, Upload, TrendingDown, BookOpen, Smartphone
+  ChevronRight, Search, FileStack, Shield, Upload, TrendingDown, BookOpen, Smartphone, HardDrive
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -86,6 +86,7 @@ const sections = [
     color: "bg-emerald-50 text-emerald-600",
     items: [
       { label: "File Types", desc: "Central manager for file categories across all modules", path: "/settings/file-types", icon: FileStack },
+      { label: "Data Export Center", desc: "Export data to Google Drive with structured folders", path: "/settings/data-export", icon: HardDrive },
       { label: "Mobile App", desc: "Upload APK / IPA builds & manage OTA version updates", path: "/settings/mobile-app", icon: Smartphone },
     ],
   },

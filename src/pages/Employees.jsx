@@ -8,6 +8,7 @@ import EmployeeDocumentImportModal from "@/components/employees/EmployeeDocument
 import { useSortable } from "@/hooks/useSortable";
 import { SortableTh } from "@/components/shared/SortIcon";
 import { Button } from "@/components/ui/button";
+import BackToOverviewButton from "@/components/shared/BackToOverviewButton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -152,6 +153,7 @@ export default function Employees() {
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          <BackToOverviewButton to="/timehr-overview" />
           <div className="p-2.5 rounded-xl bg-primary/10">
             <Users className="w-5 h-5 text-primary" />
           </div>
@@ -235,7 +237,7 @@ export default function Employees() {
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">

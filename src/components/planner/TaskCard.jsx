@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Timer, Pencil, Trash2, RefreshCw, Check } from "lucide-react";
+import { Timer, Pencil, Trash2, RefreshCw, Check, CheckCircle2 } from "lucide-react";
 
 const CARD_BG = {
   "Queued":        "bg-amber-50 border-amber-200",
@@ -30,7 +30,7 @@ function planDuration(timeIn, timeOut) {
   } catch { return null; }
 }
 
-export default function TaskCard({ task, employees = [], timeEntries = [], subtasks = [], onClick, onDragStart, onDelete, onUpdateWorkers, taskIndex, taskTotal }) {
+export default function TaskCard({ task, employees = [], timeEntries = [], subtasks = [], onClick, onDragStart, onDelete, onUpdateWorkers, onComplete, taskIndex, taskTotal }) {
   const [showTooltip, setShowTooltip] = React.useState(false);
   const cardBg = CARD_BG[task.status] || CARD_BG["Queued"];
   const isDraggable = task.status === "Queued" || task.status === "Scheduled" || task.status === "Not Completed" || task.status === "Active";
@@ -146,30 +146,40 @@ export default function TaskCard({ task, employees = [], timeEntries = [], subta
           <p className="mt-2 pt-2 border-t border-border text-muted-foreground whitespace-pre-wrap">{task.notes}</p>
         )}
         {/* Action buttons */}
-        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border">
+        <div className="flex items-stretch gap-1.5 mt-2 pt-2 border-t border-border">
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setShowTooltip(false); onClick && onClick(task); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            <Pencil className="w-3 h-3" /> Edit
+            <Pencil className="w-3 h-3 shrink-0" /> Edit
           </button>
           {onUpdateWorkers && (
             <button
               type="button"
               title="Refresh assigned workers to match their current team/group"
               onClick={(e) => { e.stopPropagation(); setShowTooltip(false); onUpdateWorkers(task); }}
-              className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
             >
-              <RefreshCw className="w-3 h-3" /> Update workers
+              <RefreshCw className="w-3 h-3 shrink-0" /> Workers
+            </button>
+          )}
+          {onComplete && task.status !== "Completed" && (
+            <button
+              type="button"
+              title="Mark this task as completed"
+              onClick={(e) => { e.stopPropagation(); setShowTooltip(false); onComplete(task); }}
+              className="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[11px] font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+            >
+              <CheckCircle2 className="w-3 h-3 shrink-0" /> Done
             </button>
           )}
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setShowTooltip(false); onDelete && onDelete(task); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors ml-auto"
+            className="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[11px] font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
           >
-            <Trash2 className="w-3 h-3" /> Delete
+            <Trash2 className="w-3 h-3 shrink-0" /> Delete
           </button>
         </div>
       </div>

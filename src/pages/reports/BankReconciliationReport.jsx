@@ -102,7 +102,7 @@ export default function BankReconciliationReport() {
 
           {/* Unreconciled list */}
           {unreconciledTxs.length > 0 && (
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden scrollable-table">
               <div className="px-4 py-3 bg-orange-50 border-b border-border">
                 <p className="text-sm font-semibold text-orange-700">{unreconciledTxs.length} Unreconciled Transactions</p>
               </div>

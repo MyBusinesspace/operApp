@@ -126,7 +126,7 @@ export default function AccountTransactions() {
       ) : !selectedAccountId ? (
         <div className="py-20 text-center text-muted-foreground text-sm">Select an account to view transactions</div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden overflow-x-auto">
+        <div className="rounded-xl border border-border bg-card overflow-hidden overflow-x-auto scrollable-table">
           {/* Report title */}
           <div className="px-5 py-4 border-b border-border bg-background">
             <p className="text-lg font-bold text-foreground">{selectedAccount?.name} Transactions</p>

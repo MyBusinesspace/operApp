@@ -99,6 +99,27 @@
       "type": "string",
       "description": "Cached work order name"
     },
+    "task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked task IDs"
+    },
+    "task_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task titles"
+    },
+    "task_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task reference codes"
+    },
     "purchase_order_id": {
       "type": "string",
       "description": "Linked Purchase Order"

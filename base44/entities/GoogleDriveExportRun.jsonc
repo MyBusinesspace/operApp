@@ -1,0 +1,45 @@
+{
+  "name": "GoogleDriveExportRun",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed"
+      ],
+      "default": "running",
+      "description": "Current status of the export run"
+    },
+    "current_stage": {
+      "type": "string",
+      "default": "init",
+      "description": "Current export stage (init, organization, business_companies, business_projects, business_assets, done)"
+    },
+    "current_offset": {
+      "type": "number",
+      "default": 0,
+      "description": "Current batch offset within the stage"
+    },
+    "current_item": {
+      "type": "string",
+      "description": "Current item being processed (for UI feedback)"
+    },
+    "files_uploaded": {
+      "type": "number",
+      "default": 0
+    },
+    "files_skipped": {
+      "type": "number",
+      "default": 0
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if status is failed"
+    }
+  },
+  "required": [
+    "status"
+  ]
+}

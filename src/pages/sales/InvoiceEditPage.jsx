@@ -69,6 +69,9 @@ export default function InvoiceEditPage() {
       navigate(`/sales/invoices/${created.id}/edit`, { replace: true });
     }
     savedRef.current = true;
+    if (close) {
+      navigate("/sales/invoices");
+    }
   };
 
   const handlePrint = async (inv) => {

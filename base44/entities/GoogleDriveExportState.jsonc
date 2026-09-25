@@ -1,0 +1,60 @@
+{
+  "name": "GoogleDriveExportState",
+  "type": "object",
+  "properties": {
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "folder",
+        "file",
+        "run"
+      ],
+      "description": "Type of entry: folder mapping, file mapping, or export run log"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entity type for folder mappings (contact, project, work_order, task, employee, contact_projects, project_workorders, wo_tasks, root_folder, contacts_root, workers_root, unlinked, etc.)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Entity ID for folder mappings"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Entity name for display"
+    },
+    "drive_folder_id": {
+      "type": "string",
+      "description": "Google Drive folder ID (for entry_type=folder)"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Original file URL in the app (for entry_type=file)"
+    },
+    "drive_file_id": {
+      "type": "string",
+      "description": "Google Drive file ID (for entry_type=file)"
+    },
+    "run_date": {
+      "type": "string",
+      "description": "ISO timestamp of the export run (for entry_type=run)"
+    },
+    "files_uploaded": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of files uploaded in this run (for entry_type=run)"
+    },
+    "files_skipped": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of files skipped (already uploaded) in this run (for entry_type=run)"
+    },
+    "status": {
+      "type": "string",
+      "description": "Status of the run (for entry_type=run)"
+    }
+  },
+  "required": [
+    "entry_type"
+  ]
+}

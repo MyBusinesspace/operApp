@@ -636,7 +636,7 @@ export default function OvertimeReport() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollable-table">
             <table className="text-sm border-collapse" style={{ minWidth: "max-content" }}>
               <thead>
                 <tr className="bg-muted/40 border-b border-border">

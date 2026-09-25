@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Users, Clock, TrendingUp, AlertCircle, Loader2, DollarSign } from "lucide-react";
-
-// Overtime threshold: hours per day beyond which OT rate kicks in
-const OT_THRESHOLD_HOURS = 8;
-// Default overtime multiplier if no specific rate configured
-const DEFAULT_OT_MULTIPLIER = 1.5;
+import { computeLabourCost, fetchProfiles, OT_THRESHOLD_HOURS, DEFAULT_OT_MULTIPLIER } from "@/lib/labourCost";
 
 function fmtCurrency(n) {
   if (!n && n !== 0) return "—";
@@ -39,121 +35,24 @@ export default function WorkhandCostPanel({ filterKey, filterId, currency = "AED
   const loadData = async () => {
     setLoading(true);
     try {
-      // Fetch time entries for this project/work order
+      // Fetch time entries for this project/work order/task
       const timeEntries = await base44.entities.TimeEntry.filter({ [filterKey]: filterId });
 
       if (!timeEntries || timeEntries.length === 0) {
         setRows([]);
+        setMissingProfiles([]);
         setTotals({ hours: 0, regularCost: 0, otCost: 0, total: 0 });
         setLoading(false);
         return;
       }
 
-      // Unique employee IDs
       const employeeIds = [...new Set(timeEntries.map(e => e.employee_id).filter(Boolean))];
+      const profileMap = await fetchProfiles(employeeIds);
+      const { rows, totals, missingProfiles } = computeLabourCost(timeEntries, profileMap);
 
-      // Fetch payroll profiles for those employees in parallel
-      const profiles = await Promise.all(
-        employeeIds.map(eid =>
-          base44.entities.EmployeePayrollProfile.filter({ employee_id: eid })
-            .then(res => (res && res.length > 0 ? res[0] : null))
-            .catch(() => null)
-        )
-      );
-
-      const profileMap = {}; // employee_id → profile
-      employeeIds.forEach((eid, i) => { profileMap[eid] = profiles[i]; });
-
-      // Group time entries by employee, then by date (to detect overtime per day)
-      const byEmployee = {};
-      timeEntries.forEach(entry => {
-        const eid = entry.employee_id;
-        if (!eid) return;
-        if (!byEmployee[eid]) byEmployee[eid] = { name: entry.employee_name || eid, entries: [] };
-        byEmployee[eid].entries.push(entry);
-      });
-
-      const missing = [];
-      let totalHours = 0, totalRegularCost = 0, totalOtCost = 0;
-
-      const computedRows = Object.entries(byEmployee).map(([eid, { name, entries }]) => {
-        const profile = profileMap[eid];
-
-        // Sum total minutes
-        const totalMins = entries.reduce((s, e) => s + (e.duration_minutes || 0), 0);
-        const totalHoursEmp = totalMins / 60;
-
-        // Group by calendar date to compute OT per day
-        const byDate = {};
-        entries.forEach(e => {
-          const dateKey = (e.clock_in_time || "").slice(0, 10) || "unknown";
-          if (!byDate[dateKey]) byDate[dateKey] = 0;
-          byDate[dateKey] += (e.duration_minutes || 0) / 60;
-        });
-
-        let regularHours = 0;
-        let overtimeHours = 0;
-        Object.values(byDate).forEach(dayHours => {
-          if (dayHours <= OT_THRESHOLD_HOURS) {
-            regularHours += dayHours;
-          } else {
-            regularHours += OT_THRESHOLD_HOURS;
-            overtimeHours += dayHours - OT_THRESHOLD_HOURS;
-          }
-        });
-
-        if (!profile || !profile.basic_salary) {
-          missing.push(name);
-          return {
-            employeeId: eid,
-            name,
-            totalMins,
-            regularHours,
-            overtimeHours,
-            hourlyRate: null,
-            overtimeRate: null,
-            regularCost: null,
-            overtimeCost: null,
-            totalCost: null,
-          };
-        }
-
-        // Derive hourly rate from monthly salary (÷ 22 working days ÷ 8 hours)
-        const hourlyRate = profile.pay_type === "hourly"
-          ? (profile.hourly_rate || 0)
-          : (profile.basic_salary || 0) / 22 / 8;
-
-        const overtimeRate = hourlyRate * DEFAULT_OT_MULTIPLIER;
-        const regularCost = regularHours * hourlyRate;
-        const overtimeCost = overtimeHours * overtimeRate;
-        const totalCost = regularCost + overtimeCost;
-
-        totalHours += totalHoursEmp;
-        totalRegularCost += regularCost;
-        totalOtCost += overtimeCost;
-
-        return {
-          employeeId: eid,
-          name,
-          totalMins,
-          regularHours,
-          overtimeHours,
-          hourlyRate,
-          overtimeRate,
-          regularCost,
-          overtimeCost,
-          totalCost,
-        };
-      });
-
-      setRows(computedRows);
-      setMissingProfiles(missing);
-      setTotals({
-        hours: totalHours,
-        regularCost: totalRegularCost,
-        otCost: totalOtCost,
-        total: totalRegularCost + totalOtCost,
-      });
+      setRows(rows);
+      setMissingProfiles(missingProfiles);
+      setTotals(totals);
     } catch (err) {
       console.error("WorkhandCostPanel error:", err);
     }

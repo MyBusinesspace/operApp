@@ -90,6 +90,7 @@ import FixedAssetReconciliation from '@/pages/reports/FixedAssetReconciliation';
 import TimeCostReport from '@/pages/reports/TimeCostReport';
 import MobileAppSettings from '@/pages/settings/MobileAppSettings';
 import HistoricalPaymentsImport from '@/pages/settings/HistoricalPaymentsImport';
+import DataExportCenter from '@/pages/settings/DataExportCenter';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -180,6 +181,7 @@ const AuthenticatedApp = () => {
           <Route path="/settings/purchasing" element={<PurchasingSettings />} />
           <Route path="/settings/mobile-app" element={<MobileAppSettings />} />
           <Route path="/settings/historical-payments" element={<HistoricalPaymentsImport />} />
+          <Route path="/settings/data-export" element={<DataExportCenter />} />
           <Route path="/sales-overview" element={<SalesOverview />} />
           <Route path="/purchasing-overview" element={<PurchasingOverview />} />
           <Route path="/purchasing/bills" element={<Bills />} />
