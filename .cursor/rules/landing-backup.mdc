@@ -1,0 +1,29 @@
+---
+description: Restore OperApp landing page after src/base44 replace
+alwaysApply: true
+---
+
+# Landing page backup
+
+Marketing landing lives in `src/pages/LandingPage.*` and is **wiped** if `src/` is replaced from a Base44 export.
+
+**Durable backup (outside src/base44):** `ops/landing-backup/`
+
+## When the user replaces `src/` and/or `base44/`
+
+Immediately run from repo root:
+
+```bash
+node ops/landing-backup/restore.mjs
+```
+
+Then verify:
+
+- `/` → LandingPage
+- `/app` → Dashboard (protected)
+- Login/Register/OAuth redirect → `/app`
+- TopNavBar logo → `/app`
+
+If the script misses a routing edge case, re-apply from `ops/landing-backup/patches/` and `ops/landing-backup/RESTORE.md`.
+
+Do **not** put the only copy of the landing under `src/` or `base44/`.

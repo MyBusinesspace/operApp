@@ -445,7 +445,7 @@ export default function TopNavBar() {
       <div className="max-w-[1440px] mx-auto px-4 lg:px-6">
         <div className="flex items-center justify-between h-[var(--nav-height)]">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
+          <Link to="/app" className="flex items-center gap-2 shrink-0">
             <img
               src="https://media.base44.com/images/public/6a201f5ce89c0f167dbe847d/574a64419_OPERAPPLOGO.png"
               alt="operapp"

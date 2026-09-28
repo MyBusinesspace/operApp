@@ -66,3 +66,7 @@ In Supabase → Authentication → URL Configuration, allow the OAuth callback:
 ## Base44
 
 Documentation: <https://docs.base44.com/Integrations/Using-GitHub>
+
+بعد استبدال المجلدين شغّل:
+
+node ops/landing-backup/restore.mjs
