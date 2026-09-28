@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -93,10 +93,21 @@ import HistoricalPaymentsImport from '@/pages/settings/HistoricalPaymentsImport'
 import DataExportCenter from '@/pages/settings/DataExportCenter';
 import LandingPage from '@/pages/LandingPage';
 
+const PUBLIC_PATHS = new Set([
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+]);
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const { pathname } = useLocation();
+  const isPublicPath = PUBLIC_PATHS.has(pathname);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Marketing + auth pages must render immediately — do not block on app/auth bootstrap.
+  if (!isPublicPath && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -111,7 +122,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError?.type === 'user_not_registered') {
+  if (!isPublicPath && authError?.type === 'user_not_registered') {
     return <UserNotRegisteredError />;
   }
 

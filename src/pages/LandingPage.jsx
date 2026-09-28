@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import {
   ArrowRight,
@@ -19,9 +19,6 @@ import {
   Wallet,
 } from "lucide-react";
 import "./LandingPage.css";
-
-const LOGO =
-  "https://media.base44.com/images/public/6a201f5ce89c0f167dbe847d/574a64419_OPERAPPLOGO.png";
 
 const FEATURES = [
   {
@@ -119,7 +116,7 @@ function scrollToSection(id) {
 }
 
 export default function LandingPage() {
-  const { isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [yearly, setYearly] = useState(false);
 
@@ -138,17 +135,8 @@ export default function LandingPage() {
     }
   };
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="dp-boot">
-        <img src={LOGO} alt="OperApp" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/app" replace />;
-  }
+  const primaryHref = isAuthenticated ? "/app" : "/login";
+  const primaryLabel = isAuthenticated ? "Open App" : "Get Started";
 
   return (
     <div className="dp">
@@ -182,12 +170,20 @@ export default function LandingPage() {
               </a>
             </nav>
             <div className="dp-nav-cta">
-              <Link to="/login" className="dp-text-btn">
-                Sign In
-              </Link>
-              <Link to="/login" className="dp-btn dp-btn-green">
-                Get Started
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/app" className="dp-btn dp-btn-green">
+                  Open App
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="dp-text-btn">
+                    Sign In
+                  </Link>
+                  <Link to="/login" className="dp-btn dp-btn-green">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -211,8 +207,8 @@ export default function LandingPage() {
                 workspace built for field and service businesses.
               </p>
               <div className="dp-hero-actions dp-anim-up" style={{ "--d": "0.28s" }}>
-                <Link to="/login" className="dp-btn dp-btn-green dp-btn-lg">
-                  Get Started
+                <Link to={primaryHref} className="dp-btn dp-btn-green dp-btn-lg">
+                  {primaryLabel}
                   <ArrowRight size={16} aria-hidden />
                 </Link>
                 <a
@@ -694,8 +690,8 @@ export default function LandingPage() {
               Start your free trial today.
             </p>
             <div className="dp-hero-actions">
-              <Link to="/login" className="dp-btn dp-btn-white dp-btn-lg">
-                Get started
+              <Link to={primaryHref} className="dp-btn dp-btn-white dp-btn-lg">
+                {primaryLabel}
               </Link>
               <Link to="/login" className="dp-btn dp-btn-ghost-light dp-btn-lg">
                 Contact sales
