@@ -4,9 +4,8 @@
  */
 
 export function isDemoEnabled() {
-  // Local: always on. Production: only when VITE_ENABLE_DEMO=true.
-  if (import.meta.env.DEV) return true;
-  return import.meta.env.VITE_ENABLE_DEMO === "true";
+  // On unless explicitly disabled (local + Vercel production).
+  return import.meta.env.VITE_ENABLE_DEMO !== "false";
 }
 
 export { INDUSTRIES, getIndustry } from "./industries.js";

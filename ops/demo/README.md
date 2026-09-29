@@ -2,18 +2,13 @@
 
 Lives in `ops/demo/` so Base44 `src/` replaces do not wipe it.
 
-## Local
+## Local / Production
 
-Demo is always enabled in Vite DEV.
+Demo is **on by default**. Hide with `VITE_ENABLE_DEMO=false`.
 
-1. Open http://127.0.0.1:5174/
-2. Click **Try Demo**
-3. Pick Construction / Healthcare / Facilities
-4. Interact with the dashboard (toggle work-order status, Reset data)
-
-## Production (Vercel)
-
-Set `VITE_ENABLE_DEMO=true` then rebuild. Without it, `/demo` routes are not mounted.
+1. Open the site → **Try Demo**
+2. Pick Construction / Healthcare / Facilities
+3. View-only dashboard with guide card
 
 ## After Base44 src replace
 
