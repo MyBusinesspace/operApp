@@ -108,6 +108,36 @@ patchFile("src/App.jsx", (src) => {
     `unauthenticatedElement={<Navigate to="/login" replace />}`
   );
 
+  // Demo routes (ops/demo stays intact; only re-wire App.jsx)
+  if (!out.includes("@demo/pages/DemoSelect")) {
+    out = out.replace(
+      /import LandingPage from ['"]@\/pages\/LandingPage['"];?/,
+      `import LandingPage from '@/pages/LandingPage';\nimport DemoSelect from '@demo/pages/DemoSelect.jsx';\nimport DemoDashboard from '@demo/pages/DemoDashboard.jsx';\nimport { isDemoEnabled } from '@demo/index.js';`
+    );
+  }
+  if (!out.includes('path="/demo"') && out.includes("<LandingPage")) {
+    out = out.replace(
+      /<Route path=["']\/reset-password["'][^/]*\/>/,
+      (m) =>
+        `${m}\n      {isDemoEnabled() && (\n        <>\n          <Route path="/demo" element={<DemoSelect />} />\n          <Route path="/demo/app" element={<DemoDashboard />} />\n        </>\n      )}`
+    );
+  }
+  if (!out.includes('pathname.startsWith("/demo")')) {
+    out = out.replace(
+      /const isPublicPath = PUBLIC_PATHS\.has\(pathname\);/,
+      `const isPublicPath =\n    PUBLIC_PATHS.has(pathname) || pathname.startsWith("/demo");`
+    );
+  }
+  for (const p of ["/demo", "/demo/app"]) {
+    if (!out.includes(`"${p}"`) && out.includes("PUBLIC_PATHS")) {
+      out = out.replace(
+        /\/reset-password["'],?\s*\n\s*\];/,
+        `/reset-password",\n  "/demo",\n  "/demo/app",\n];`
+      );
+      break;
+    }
+  }
+
   return out;
 });
 

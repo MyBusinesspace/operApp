@@ -18,11 +18,13 @@ export default defineConfig({
       ),
       "@base44/sdk": compatSdk,
       "@": path.resolve(__dirname, "src"),
+      "@demo": path.resolve(__dirname, "ops/demo"),
     },
   },
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 5174,
     host: "127.0.0.1",
+    strictPort: true,
   },
 });

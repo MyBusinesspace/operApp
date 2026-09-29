@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { isDemoEnabled } from "@demo/index.js";
 import {
   ArrowRight,
   Bell,
@@ -137,6 +138,7 @@ export default function LandingPage() {
 
   const primaryHref = isAuthenticated ? "/app" : "/login";
   const primaryLabel = isAuthenticated ? "Open App" : "Get Started";
+  const showDemo = isDemoEnabled();
 
   return (
     <div className="dp">
@@ -170,6 +172,11 @@ export default function LandingPage() {
               </a>
             </nav>
             <div className="dp-nav-cta">
+              {showDemo && (
+                <Link to="/demo" className="dp-text-btn">
+                  Try Demo
+                </Link>
+              )}
               {isAuthenticated ? (
                 <Link to="/app" className="dp-btn dp-btn-green">
                   Open App
@@ -211,16 +218,25 @@ export default function LandingPage() {
                   {primaryLabel}
                   <ArrowRight size={16} aria-hidden />
                 </Link>
-                <a
-                  href="#dashboard"
-                  className="dp-btn dp-btn-outline-blue dp-btn-lg"
-                  onClick={(e) => onNavClick(e, "dashboard")}
-                >
-                  <span className="dp-play">
-                    <Play size={12} fill="currentColor" aria-hidden />
-                  </span>
-                  See Operations
-                </a>
+                {showDemo ? (
+                  <Link to="/demo" className="dp-btn dp-btn-outline-blue dp-btn-lg">
+                    <span className="dp-play">
+                      <Play size={12} fill="currentColor" aria-hidden />
+                    </span>
+                    Try Demo
+                  </Link>
+                ) : (
+                  <a
+                    href="#dashboard"
+                    className="dp-btn dp-btn-outline-blue dp-btn-lg"
+                    onClick={(e) => onNavClick(e, "dashboard")}
+                  >
+                    <span className="dp-play">
+                      <Play size={12} fill="currentColor" aria-hidden />
+                    </span>
+                    See Operations
+                  </a>
+                )}
               </div>
               <div className="dp-stats dp-anim-up" style={{ "--d": "0.36s" }}>
                 <div>

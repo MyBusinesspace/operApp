@@ -92,6 +92,9 @@ import MobileAppSettings from '@/pages/settings/MobileAppSettings';
 import HistoricalPaymentsImport from '@/pages/settings/HistoricalPaymentsImport';
 import DataExportCenter from '@/pages/settings/DataExportCenter';
 import LandingPage from '@/pages/LandingPage';
+import DemoSelect from '@demo/pages/DemoSelect.jsx';
+import DemoDashboard from '@demo/pages/DemoDashboard.jsx';
+import { isDemoEnabled } from '@demo/index.js';
 
 const PUBLIC_PATHS = new Set([
   "/",
@@ -99,14 +102,17 @@ const PUBLIC_PATHS = new Set([
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/demo",
+  "/demo/app",
 ]);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
   const { pathname } = useLocation();
-  const isPublicPath = PUBLIC_PATHS.has(pathname);
+  const isPublicPath =
+    PUBLIC_PATHS.has(pathname) || pathname.startsWith("/demo");
 
-  // Marketing + auth pages must render immediately — do not block on app/auth bootstrap.
+  // Marketing + auth + demo pages must render immediately — do not block on app/auth bootstrap.
   if (!isPublicPath && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -134,6 +140,12 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      {isDemoEnabled() && (
+        <>
+          <Route path="/demo" element={<DemoSelect />} />
+          <Route path="/demo/app" element={<DemoDashboard />} />
+        </>
+      )}
 
       {/* Protected workspace */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

@@ -1,29 +1,25 @@
 ---
-description: Restore OperApp landing page after src/base44 replace
+description: Restore OperApp landing + demo after src/base44 replace
 alwaysApply: true
 ---
 
-# Landing page backup
+# Landing + demo backup
 
-Marketing landing lives in `src/pages/LandingPage.*` and is **wiped** if `src/` is replaced from a Base44 export.
+Marketing landing: `src/pages/LandingPage.*`  
+Interactive demo: `ops/demo/` (outside Base44 — do not move into `src/`)
 
-**Durable backup (outside src/base44):** `ops/landing-backup/`
-
-## When the user replaces `src/` and/or `base44/`
-
-Immediately run from repo root:
+## After replacing `src/` and/or `base44/`
 
 ```bash
 node ops/landing-backup/restore.mjs
 ```
 
-Then verify:
+Verify:
 
-- `/` → LandingPage
-- `/app` → Dashboard (protected)
-- Login/Register/OAuth redirect → `/app`
-- TopNavBar logo → `/app`
+- `/` → LandingPage (Try Demo CTA when demo enabled)
+- `/demo` → industry picker
+- `/demo/app` → demo dashboard
+- `/app` → real Dashboard (protected)
+- Vite alias `@demo` → `ops/demo` in `vite.config.js`
 
-If the script misses a routing edge case, re-apply from `ops/landing-backup/patches/` and `ops/landing-backup/RESTORE.md`.
-
-Do **not** put the only copy of the landing under `src/` or `base44/`.
+Demo is on in local DEV always; production needs `VITE_ENABLE_DEMO=true`.
