@@ -1,0 +1,257 @@
+{
+  "name": "BankTransaction",
+  "type": "object",
+  "properties": {
+    "bank_account_id": {
+      "type": "string",
+      "description": "Reference to BankAccount"
+    },
+    "bank_account_name": {
+      "type": "string",
+      "description": "Cached bank account name"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Transaction date"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description / narration"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Reference number or cheque number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Receive Money",
+        "Spend Money",
+        "Transfer",
+        "Batch Payment"
+      ],
+      "default": "Spend Money"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "tax_type": {
+      "type": "string",
+      "enum": [
+        "Tax Exclusive",
+        "Tax Inclusive",
+        "No Tax"
+      ],
+      "default": "Tax Exclusive",
+      "description": "How tax is applied to line item amounts"
+    },
+    "line_items": {
+      "type": "array",
+      "description": "Allocation lines for this transaction (account breakdown)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
+          },
+          "unit_price": {
+            "type": "number",
+            "default": 0
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "tax_rate": {
+            "type": "number",
+            "default": 0
+          },
+          "amount": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      }
+    },
+    "batch_items": {
+      "type": "array",
+      "description": "For Batch Payment type: the individual bills paid in this batch",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bill_id": {
+            "type": "string",
+            "description": "Reference to the Bill being paid"
+          },
+          "bill_number": {
+            "type": "string",
+            "description": "Cached bill number for display and linking"
+          },
+          "contact_name": {
+            "type": "string",
+            "description": "Payee / supplier name"
+          },
+          "details": {
+            "type": "string",
+            "description": "Details to appear on contact's bank statement"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "total": {
+            "type": "number",
+            "default": 0
+          },
+          "payment_amount": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      }
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Chart of Account to post against (single-line legacy)"
+    },
+    "account_code": {
+      "type": "string"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Unreconciled",
+        "Reconciled"
+      ],
+      "default": "Unreconciled"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Invoice",
+        "Bill",
+        "PettyCash",
+        "Transfer",
+        "Payroll"
+      ],
+      "default": "Manual"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_number": {
+      "type": "string"
+    },
+    "journal_entry_id": {
+      "type": "string",
+      "description": "Linked journal entry if auto-posted"
+    },
+    "transfer_to_account_id": {
+      "type": "string",
+      "description": "For Transfer type: destination bank account"
+    },
+    "transfer_to_account_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "bank_account_id",
+    "date",
+    "amount",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

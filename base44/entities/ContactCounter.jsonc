@@ -1,0 +1,76 @@
+{
+  "name": "ContactCounter",
+  "type": "object",
+  "properties": {
+    "prefix": {
+      "type": "string",
+      "description": "Counter key \u2014 the code prefix (CUS, SUP, PAR, CON)"
+    },
+    "last_number": {
+      "type": "number",
+      "default": 0,
+      "description": "Last value handed out for this prefix. Incremented atomically via compare-and-swap."
+    }
+  },
+  "required": [
+    "prefix"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

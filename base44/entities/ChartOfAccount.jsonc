@@ -1,0 +1,172 @@
+{
+  "name": "ChartOfAccount",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Account code e.g. 1000, 1100, 2000"
+    },
+    "name": {
+      "type": "string",
+      "description": "Account name"
+    },
+    "type": {
+      "type": "string",
+      "description": "Account type \u2014 Xero detailed type (Bank, Current Asset, Fixed Asset, Revenue, Expense, etc.)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Assets",
+        "Liabilities",
+        "Equity",
+        "Expenses",
+        "Revenue"
+      ],
+      "description": "Account category \u2014 auto-computed from type (Assets, Liabilities, Equity, Expenses, Revenue)"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent account ID for hierarchical structure"
+    },
+    "parent_code": {
+      "type": "string",
+      "description": "Cached parent account code"
+    },
+    "parent_name": {
+      "type": "string",
+      "description": "Cached parent account name"
+    },
+    "tax_rate_id": {
+      "type": "string",
+      "description": "Default tax rate linked to this account"
+    },
+    "tax_rate_name": {
+      "type": "string",
+      "description": "Cached tax rate name"
+    },
+    "tax_rate_value": {
+      "type": "number",
+      "description": "Cached tax rate percentage"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description or usage notes"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency for this account"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived"
+      ],
+      "default": "Active"
+    },
+    "show_on_dashboard": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show balance on accounting dashboard"
+    },
+    "enable_payments": {
+      "type": "boolean",
+      "default": false,
+      "description": "Account can be used for payments (bank/cash)"
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "System account \u2014 cannot be deleted"
+    },
+    "lock_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Entries before this date are locked for editing"
+    },
+    "opening_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Opening balance amount"
+    },
+    "opening_balance_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the opening balance"
+    },
+    "ytd_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Year-to-date balance (computed)"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

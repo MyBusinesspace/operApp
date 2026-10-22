@@ -1,0 +1,180 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Full name of the employee"
+    },
+    "employee_no": {
+      "type": "string",
+      "description": "Employee number / WPS worker ID (shown on payroll and profile)"
+    },
+    "id_document_number": {
+      "type": "string",
+      "description": "ID document number (personal data; same access as employee_no)"
+    },
+    "bank_account": {
+      "type": "string",
+      "description": "IBAN / bank account number for salary transfers"
+    },
+    "email": {
+      "type": "string",
+      "description": "Work email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "role": {
+      "type": "string",
+      "description": "Employee role \u2014 references EmployeeRole.name",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department the employee belongs to"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "On Leave",
+        "Inactive",
+        "Terminated"
+      ],
+      "default": "Active",
+      "description": "Current employment status"
+    },
+    "hire_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of hire"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "team_id": {
+      "type": "string",
+      "description": "Reference to Team"
+    },
+    "team_name": {
+      "type": "string",
+      "description": "Cached team name"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked app User ID (Base44 user)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Cached linked user email"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the employee"
+    },
+    "absence_status": {
+      "type": "string",
+      "enum": [
+        "vacation",
+        "sick",
+        "other"
+      ],
+      "description": "Current absence/unavailability status"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Manual sort position in the Planner \u2014 lower numbers appear first"
+    }
+  },
+  "required": [
+    "full_name",
+    "email",
+    "role"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_view_all_employees": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_edit_all_employees": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_edit_all_employees": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_edit_all_employees": true
+          }
+        }
+      ]
+    }
+  }
+}

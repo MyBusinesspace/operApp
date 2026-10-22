@@ -1,0 +1,202 @@
+{
+  "name": "JournalEntry",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Journal entry number e.g. JNL-0001"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Entry date"
+    },
+    "narration": {
+      "type": "string",
+      "description": "Description / narration"
+    },
+    "reference": {
+      "type": "string",
+      "description": "External reference. For payment entries, holds the internal payment id to allow exact reversal lookup."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Invoice",
+        "Bill",
+        "PurchaseOrder",
+        "PettyCash",
+        "Payroll",
+        "CreditNote",
+        "OpeningBalance"
+      ],
+      "default": "Manual",
+      "description": "Origin of this journal entry. 'OpeningBalance' = the conversion-date opening balance journal generated from the Chart of Accounts trial balance."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the originating document"
+    },
+    "source_number": {
+      "type": "string",
+      "description": "Cached document number (e.g. INV-0001)"
+    },
+    "link_confidence": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "ordered"
+      ],
+      "description": "How the journal was linked to its source document by the journal-to-doc linker. 'exact' = single unambiguous candidate match. 'ordered' = deterministic tie-breaker within a group of N identical candidate docs and N journals (same contact+date+total), paired by ascending number. NULL = not set by the linker (manual entries, auto-posted entries, or not yet linked)."
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "document",
+        "payment",
+        "reversal"
+      ],
+      "default": "document",
+      "description": "Origin subtype: 'document' = auto-posted from Invoice/Bill/CreditNote approval; 'payment' = recorded payment against the document; 'reversal' = offsetting entry that voids another entry. Legacy entries without this field are treated as 'document'."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Posted",
+        "Voided"
+      ],
+      "default": "Draft"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "total_debit": {
+      "type": "number",
+      "default": 0
+    },
+    "total_credit": {
+      "type": "number",
+      "default": 0
+    },
+    "lines": {
+      "type": "array",
+      "description": "Debit/credit lines",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "debit": {
+            "type": "number"
+          },
+          "credit": {
+            "type": "number"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "tax_amount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "posted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the entry was posted"
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "date",
+    "narration"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

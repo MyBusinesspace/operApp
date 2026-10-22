@@ -1,0 +1,132 @@
+{
+  "name": "AccountingSettings",
+  "type": "object",
+  "properties": {
+    "financial_year_start_month": {
+      "type": "number",
+      "default": 1,
+      "description": "Month number when financial year starts (1=Jan, 4=Apr, etc.)"
+    },
+    "default_currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "lock_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Global lock date \u2014 no entries before this date can be edited"
+    },
+    "conversion_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the ledger starts (day before the earliest GL entry). The Opening Balance journal is dated this date. Set automatically by generateOpeningBalance."
+    },
+    "tax_basis": {
+      "type": "string",
+      "enum": [
+        "Accrual",
+        "Cash"
+      ],
+      "default": "Accrual"
+    },
+    "auto_post_invoices": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically create journal entries when invoices are approved"
+    },
+    "auto_post_bills": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically create journal entries when bills are approved"
+    },
+    "accounts_receivable_id": {
+      "type": "string",
+      "description": "Default Accounts Receivable account"
+    },
+    "accounts_payable_id": {
+      "type": "string",
+      "description": "Default Accounts Payable account"
+    },
+    "sales_tax_account_id": {
+      "type": "string",
+      "description": "Default sales tax liability account"
+    },
+    "purchase_tax_account_id": {
+      "type": "string",
+      "description": "Default purchase tax asset account"
+    },
+    "retained_earnings_id": {
+      "type": "string",
+      "description": "Retained earnings account"
+    },
+    "drive_mirror_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Opt-in: mirror app files into the connected Google Drive (hourly sync). Off by default; each deployment connects its own Google account."
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the first-login welcome wizard has been completed or skipped. When true, the wizard will not open automatically on the Dashboard."
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

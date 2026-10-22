@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "packages/base44-server/generated/**",
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:rest*",
+      "destination": "/api/index?__path=:rest*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

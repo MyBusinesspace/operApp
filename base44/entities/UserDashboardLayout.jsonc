@@ -1,0 +1,25 @@
+{
+  "name": "UserDashboardLayout",
+  "type": "object",
+  "properties": {
+    "layout": {
+      "type": "object",
+      "description": "Per-user dashboard widget layout. Keys are widget IDs, values are { order, size, minimized }.",
+      "properties": {},
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

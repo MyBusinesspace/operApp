@@ -1,0 +1,85 @@
+{
+  "name": "DocumentSequence",
+  "type": "object",
+  "properties": {
+    "sequence_type": {
+      "type": "string",
+      "description": "Unique key identifying the sequence (e.g. 'JNL', 'INV', 'BILL')"
+    },
+    "next_value": {
+      "type": "number",
+      "default": 1,
+      "description": "Next value to hand out. Incremented atomically via compare-and-swap."
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Number prefix (e.g. 'JNL-')"
+    },
+    "padding": {
+      "type": "number",
+      "default": 4,
+      "description": "Zero-padding width for the numeric portion"
+    }
+  },
+  "required": [
+    "sequence_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

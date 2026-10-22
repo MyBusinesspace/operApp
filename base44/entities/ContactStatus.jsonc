@@ -1,0 +1,53 @@
+{
+  "name": "ContactStatus",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Status name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Hex color",
+      "default": "#22c55e"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

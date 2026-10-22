@@ -1,0 +1,444 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "google_drive_mirror",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "start": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "start_incremental"
+            }
+          },
+          "then": "check_start",
+          "x-base44": {
+            "title": "Open sync session",
+            "description": "Resumes an unfinished session"
+          }
+        }
+      },
+      {
+        "check_start": {
+          "switch": [
+            {
+              "when": "${ .start.hasMore == true }",
+              "then": "batch_1"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "Session ready?"
+          }
+        }
+      },
+      {
+        "batch_1": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_1",
+          "x-base44": {
+            "title": "Batch 1"
+          }
+        }
+      },
+      {
+        "check_1": {
+          "switch": [
+            {
+              "when": "${ .batch_1.hasMore == true }",
+              "then": "batch_2"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_2": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_2",
+          "x-base44": {
+            "title": "Batch 2"
+          }
+        }
+      },
+      {
+        "check_2": {
+          "switch": [
+            {
+              "when": "${ .batch_2.hasMore == true }",
+              "then": "batch_3"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_3": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_3",
+          "x-base44": {
+            "title": "Batch 3"
+          }
+        }
+      },
+      {
+        "check_3": {
+          "switch": [
+            {
+              "when": "${ .batch_3.hasMore == true }",
+              "then": "batch_4"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_4": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_4",
+          "x-base44": {
+            "title": "Batch 4"
+          }
+        }
+      },
+      {
+        "check_4": {
+          "switch": [
+            {
+              "when": "${ .batch_4.hasMore == true }",
+              "then": "batch_5"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_5": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_5",
+          "x-base44": {
+            "title": "Batch 5"
+          }
+        }
+      },
+      {
+        "check_5": {
+          "switch": [
+            {
+              "when": "${ .batch_5.hasMore == true }",
+              "then": "batch_6"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_6": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_6",
+          "x-base44": {
+            "title": "Batch 6"
+          }
+        }
+      },
+      {
+        "check_6": {
+          "switch": [
+            {
+              "when": "${ .batch_6.hasMore == true }",
+              "then": "batch_7"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_7": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_7",
+          "x-base44": {
+            "title": "Batch 7"
+          }
+        }
+      },
+      {
+        "check_7": {
+          "switch": [
+            {
+              "when": "${ .batch_7.hasMore == true }",
+              "then": "batch_8"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_8": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_8",
+          "x-base44": {
+            "title": "Batch 8"
+          }
+        }
+      },
+      {
+        "check_8": {
+          "switch": [
+            {
+              "when": "${ .batch_8.hasMore == true }",
+              "then": "batch_9"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_9": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_9",
+          "x-base44": {
+            "title": "Batch 9"
+          }
+        }
+      },
+      {
+        "check_9": {
+          "switch": [
+            {
+              "when": "${ .batch_9.hasMore == true }",
+              "then": "batch_10"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_10": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_10",
+          "x-base44": {
+            "title": "Batch 10"
+          }
+        }
+      },
+      {
+        "check_10": {
+          "switch": [
+            {
+              "when": "${ .batch_10.hasMore == true }",
+              "then": "batch_11"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_11": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "check_11",
+          "x-base44": {
+            "title": "Batch 11"
+          }
+        }
+      },
+      {
+        "check_11": {
+          "switch": [
+            {
+              "when": "${ .batch_11.hasMore == true }",
+              "then": "batch_12"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "More to do?"
+          }
+        }
+      },
+      {
+        "batch_12": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToGoogleDrive",
+            "args": {
+              "mode": "next_batch",
+              "run_id": "${ .start.run_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Batch 12",
+            "description": "Continues next hour"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "Asia/Dubai",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Google Drive Mirror",
+  "description": "Hourly incremental mirror of app files into Google Drive. Resumes the unfinished session if there is one, otherwise syncs everything created or changed since the last completed run, then mirrors deletions."
+}

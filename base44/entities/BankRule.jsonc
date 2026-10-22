@@ -1,0 +1,186 @@
+{
+  "name": "BankRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Rule name e.g. Loan to Redline Steel"
+    },
+    "rule_type": {
+      "type": "string",
+      "enum": [
+        "spend",
+        "receive",
+        "transfer"
+      ],
+      "default": "spend",
+      "description": "Spend money, Receive money, or Transfer money rule"
+    },
+    "bank_account_id": {
+      "type": "string",
+      "description": "Linked bank account (optional \u2014 applies to all if blank)"
+    },
+    "bank_account_name": {
+      "type": "string",
+      "description": "Cached bank account name"
+    },
+    "conditions": {
+      "type": "array",
+      "description": "Match conditions \u2014 all must be met",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "description",
+              "payee",
+              "reference",
+              "amount"
+            ],
+            "description": "Which bank statement line field to match"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains",
+              "starts_with",
+              "ends_with",
+              "is_blank",
+              "greater_than",
+              "less_than"
+            ],
+            "description": "Match operator"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value to match against"
+          }
+        }
+      }
+    },
+    "match_type": {
+      "type": "string",
+      "enum": [
+        "all",
+        "any"
+      ],
+      "default": "all",
+      "description": "Whether ALL conditions must match or ANY"
+    },
+    "target_account_id": {
+      "type": "string",
+      "description": "Chart of Account ID to categorise the transaction to"
+    },
+    "target_account_code": {
+      "type": "string",
+      "description": "Cached target account code"
+    },
+    "target_account_name": {
+      "type": "string",
+      "description": "Cached target account name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Optional contact to assign to the transaction"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Default reference to set on the matched transaction"
+    },
+    "tax_rate": {
+      "type": "number",
+      "description": "Default tax rate % to apply"
+    },
+    "percent_allocation": {
+      "type": "number",
+      "default": 100,
+      "description": "Percentage of the line allocated to the target account"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Execution order \u2014 rules run in ascending sort_order"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived"
+      ],
+      "default": "Active"
+    }
+  },
+  "required": [
+    "name",
+    "rule_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

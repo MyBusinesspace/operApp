@@ -1,0 +1,303 @@
+{
+  "name": "Bill",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Bill number e.g. BILL-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Supplier reference / invoice number"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary shown on the bill"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (supplier)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached supplier name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Awaiting Approval",
+        "Awaiting Payment",
+        "Paid",
+        "Repeating",
+        "Cancelled"
+      ],
+      "default": "Draft"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department this bill is allocated to"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code for this bill \u2014 defaults to the organization base currency"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0
+    },
+    "discount_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total discount amount across all line items"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    },
+    "exchange_rate": {
+      "type": "number",
+      "default": 1,
+      "description": "Manual exchange rate to the base currency: 1 base unit = rate doc units. Used to compute base_total. Defaults to 1 (same currency)."
+    },
+    "base_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Document total converted to the organization base currency (total / exchange_rate). Auto-computed on save."
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount paid against this bill"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked task IDs"
+    },
+    "task_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task titles"
+    },
+    "task_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task reference codes"
+    },
+    "purchase_order_id": {
+      "type": "string",
+      "description": "Linked Purchase Order"
+    },
+    "purchase_order_number": {
+      "type": "string",
+      "description": "Cached PO number"
+    },
+    "payments": {
+      "type": "array",
+      "description": "Payment records against this bill",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "bank_account_id": {
+            "type": "string"
+          },
+          "bank_account_name": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "bank_transaction_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "string",
+            "description": "Discount as a fixed amount or percentage (e.g. '10' or '10%')"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex photos attached to the bill",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded photo URL"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Photo caption / description"
+          },
+          "include": {
+            "type": "boolean",
+            "description": "Include this file when the document PDF is generated"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

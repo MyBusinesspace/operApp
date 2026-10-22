@@ -1,0 +1,270 @@
+{
+  "name": "Quote",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "Quote number e.g. Q-2026-0001"
+    },
+    "series": {
+      "type": "string",
+      "description": "Optional custom numbering series \u2014 1 to 6 uppercase letters (e.g. EX), used instead of the default Q prefix so the number becomes EX-2026-0001. Empty = default numbering."
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal or customer reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title shown on the quote"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary / description shown below the title on the quote"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (customer)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached customer name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Sent",
+        "Accepted",
+        "Declined",
+        "Invoiced",
+        "Cancelled"
+      ],
+      "default": "Draft",
+      "description": "Quote status"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the quote was issued"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiry / validity date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code \u2014 defaults to the organization base currency"
+    },
+    "incoterm": {
+      "type": "string",
+      "description": "Incoterm code applied to this quote (e.g. EXW, DAP, CIF)"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0,
+      "description": "Subtotal before tax"
+    },
+    "discount_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total discount amount across all line items"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Total tax amount"
+    },
+    "total": {
+      "type": "number",
+      "default": 0,
+      "description": "Grand total including tax"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "default": 1,
+      "description": "Manual exchange rate to the base currency: 1 base unit = rate doc units. Used to compute base_total. Defaults to 1 (same currency)."
+    },
+    "base_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Document total converted to the organization base currency (total / exchange_rate). Auto-computed on save."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes \u2014 not shown on the document"
+    },
+    "terms": {
+      "type": "string",
+      "description": "Terms & conditions shown on the printed / PDF document"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "task_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked task IDs"
+    },
+    "task_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task titles"
+    },
+    "task_references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Cached task reference codes (stable identifiers, e.g. TSK-2026-0286)"
+    },
+    "line_items": {
+      "type": "array",
+      "description": "Quote line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_code": {
+            "type": "string",
+            "description": "Product / service code from the catalog"
+          },
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "string",
+            "description": "Discount as a fixed amount or percentage (e.g. '10' or '10%')"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex photos attached to the quote",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded photo URL"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Photo caption / description"
+          },
+          "include": {
+            "type": "boolean",
+            "description": "Include this file when the document PDF is generated"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "name": "PurchaseOrder",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "description": "PO number e.g. PO-0001"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Internal reference"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional document title"
+    },
+    "doc_summary": {
+      "type": "string",
+      "description": "Optional summary"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact (supplier)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached supplier name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Awaiting Approval",
+        "Approved",
+        "Billed",
+        "Cancelled"
+      ],
+      "default": "Draft"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Operations",
+        "Finance",
+        "HR",
+        "Sales",
+        "IT",
+        "Field Services",
+        "Management"
+      ],
+      "description": "Department this PO is allocated to"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code for this PO \u2014 defaults to the organization base currency"
+    },
+    "subtotal": {
+      "type": "number",
+      "default": 0
+    },
+    "discount_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Total discount amount across all line items"
+    },
+    "tax_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number",
+      "default": 0
+    },
+    "exchange_rate": {
+      "type": "number",
+      "default": 1,
+      "description": "Manual exchange rate to the base currency: 1 base unit = rate doc units. Used to compute base_total. Defaults to 1 (same currency)."
+    },
+    "base_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Document total converted to the organization base currency (total / exchange_rate). Auto-computed on save."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Linked project"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "work_order_id": {
+      "type": "string",
+      "description": "Linked work order"
+    },
+    "work_order_name": {
+      "type": "string",
+      "description": "Cached work order name"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Linked Chart of Account ID"
+          },
+          "account_code": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "string",
+            "description": "Discount as a fixed amount or percentage (e.g. '10' or '10%')"
+          },
+          "tax_rate": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex photos attached to the purchase order",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded photo URL"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Photo caption / description"
+          },
+          "include": {
+            "type": "boolean",
+            "description": "Include this file when the document PDF is generated"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "contact_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

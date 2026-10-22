@@ -1,0 +1,6 @@
+-- Enable Realtime for entity.subscribe() (run after tables exist)
+-- Supabase dashboard → Database → Publications → supabase_realtime
+-- Or uncomment and run for tables you need live updates on, e.g.:
+-- alter publication supabase_realtime add table public.task;
+-- alter publication supabase_realtime add table public.time_entry;
+-- alter publication supabase_realtime add table public.employee;

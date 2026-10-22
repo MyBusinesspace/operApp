@@ -1,0 +1,98 @@
+{
+  "name": "RetiredDocumentNumber",
+  "type": "object",
+  "properties": {
+    "doc_type": {
+      "type": "string",
+      "enum": [
+        "quote",
+        "invoice",
+        "bill",
+        "purchase_order"
+      ],
+      "description": "Type of document the retired number belongs to"
+    },
+    "number": {
+      "type": "string",
+      "description": "The retired document number that can no longer be reused"
+    },
+    "year": {
+      "type": "number",
+      "description": "Year segment of the number, used for faster filtering"
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Prefix segment of the number (e.g. Q, QD, INV, ID, BILL, PO)"
+    },
+    "doc_id": {
+      "type": "string",
+      "description": "Original document ID that held this number"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why the number was retired (e.g. document deleted)"
+    }
+  },
+  "required": [
+    "doc_type",
+    "number"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    }
+  }
+}

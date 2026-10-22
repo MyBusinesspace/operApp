@@ -1,0 +1,56 @@
+#env
+.env
+.env.*
+!.env.example
+!supabase/.env.example
+
+# Vercel variables: keep the real values local, commit only the template
+vercel.env
+!vercel.env.example
+
+# Logs
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.cursor/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+.vite
+base44/.app.jsonc
+
+# Local archives / scratch files
+*.rar
+*.zip
+
+# Compiled Base44 backend functions (rebuilt by: npm run api:build)
+packages/base44-server/generated/
+
+# Local infra secrets
+supabase/.env
+supabase/.temp/
+supabase/.branches/
+
+.vercel
+.env*
+
+NUL
+NUL.css

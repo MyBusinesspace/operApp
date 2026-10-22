@@ -1,0 +1,105 @@
+{
+  "name": "WorkingReportValidationRun",
+  "type": "object",
+  "properties": {
+    "run_at": {
+      "type": "string",
+      "description": "ISO timestamp when the validation ran"
+    },
+    "date_from": {
+      "type": "string",
+      "description": "Start of validated date range"
+    },
+    "date_to": {
+      "type": "string",
+      "description": "End of validated date range"
+    },
+    "checked": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of reports checked"
+    },
+    "violations_found": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of violations found"
+    },
+    "quarantined": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of reports deleted (quarantined)"
+    },
+    "auto_quarantine": {
+      "type": "boolean",
+      "default": false
+    },
+    "triggered_by": {
+      "type": "string",
+      "enum": [
+        "workflow",
+        "manual"
+      ],
+      "default": "workflow",
+      "description": "Whether the run was triggered by the scheduled workflow or a manual call"
+    },
+    "violations_summary": {
+      "type": "array",
+      "description": "Summary of each violation found",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "task_reference": {
+            "type": "string"
+          },
+          "employee_name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "duration_minutes": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "date_from",
+    "date_to"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

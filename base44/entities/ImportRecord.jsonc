@@ -1,0 +1,85 @@
+{
+  "name": "ImportRecord",
+  "type": "object",
+  "properties": {
+    "entity_type": {
+      "type": "string",
+      "description": "Entity key (ChartOfAccount, Contact, Invoice, Bill, XeroGL, BankTransaction, etc.)"
+    },
+    "imported_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the import completed"
+    },
+    "record_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total records imported (created + updated)"
+    },
+    "created_count": {
+      "type": "number",
+      "default": 0,
+      "description": "New records created"
+    },
+    "updated_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Existing records updated (upsert)"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "append",
+        "replace"
+      ],
+      "default": "append"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Name of the imported file"
+    },
+    "bank_account_id": {
+      "type": "string",
+      "description": "For BankTransaction imports: the selected OPERAPP360 bank account ID"
+    },
+    "bank_account_name": {
+      "type": "string",
+      "description": "For BankTransaction imports: the selected OPERAPP360 bank account name"
+    }
+  },
+  "required": [
+    "entity_type",
+    "imported_at",
+    "record_count"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

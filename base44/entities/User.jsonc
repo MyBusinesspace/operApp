@@ -1,0 +1,148 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The role of the user in the app. References an EmployeeRole key from HR Settings \u2192 Roles & Permissions. Use 'admin' for platform-level admin access (RLS admin bypass)."
+    },
+    "can_view_all_employees": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this user can see & edit ALL employee profiles AND their HR documents (not just their own). Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_view_all_leave": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this user can see & edit ALL employees' leave requests (not just their own). Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_view_all_payroll": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this user can see & edit ALL employees' payroll entries (not just their own). Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_view_all_petty_cash": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this user can see & edit ALL employees' petty cash entries (not just their own). Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_read_finance": {
+      "type": "boolean",
+      "default": false,
+      "title": "Can read finance data",
+      "description": "When true, this user can read finance data (invoices, bills, credit notes, journals, bank transactions, accounts, etc.).",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_write_finance": {
+      "type": "boolean",
+      "default": false,
+      "title": "Can write finance data",
+      "description": "When true, this user can create, update, and delete finance data (invoices, bills, credit notes, journals, bank transactions, accounts, etc.).",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_manage_time": {
+      "type": "boolean",
+      "default": false,
+      "title": "Can manage time entries",
+      "description": "When true, this user can update and delete any worker's TimeEntry records (not just their own). Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_edit_all_employees": {
+      "type": "boolean",
+      "default": false,
+      "description": "Data-scope write level for Profiles & HR documents: true = edit everyone's; false with can_view_all_employees true = view only. Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_edit_all_leave": {
+      "type": "boolean",
+      "default": false,
+      "description": "Data-scope write level for Leave: true = act on everyone's leave; false with can_view_all_leave true = view only. Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_edit_all_payroll": {
+      "type": "boolean",
+      "default": false,
+      "description": "Data-scope write level for Payroll: true = change everyone's payroll; false with can_view_all_payroll true = view only. Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    },
+    "can_edit_all_petty_cash": {
+      "type": "boolean",
+      "default": false,
+      "description": "Data-scope write level for Petty cash: true = add entries in any wallet; false with can_view_all_petty_cash true = view only. Synced from the user's EmployeeRole.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

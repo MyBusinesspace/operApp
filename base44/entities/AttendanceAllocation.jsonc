@@ -1,0 +1,119 @@
+{
+  "name": "AttendanceAllocation",
+  "type": "object",
+  "properties": {
+    "attendance_id": {
+      "type": "string",
+      "description": "Reference to the AttendanceDay this time is assigned to"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Reference to the Employee (copied from the attendance day)"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "The id of the app user who owns this allocation (copied from the attendance day)"
+    },
+    "work_date": {
+      "type": "string",
+      "description": "Company-local calendar date (YYYY-MM-DD, Asia/Dubai), copied from the attendance day"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Reference to the Task this time is assigned to"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Cached task title"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Reference to the Project this time is assigned to"
+    },
+    "project_name": {
+      "type": "string",
+      "description": "Cached project name"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to the Contact inherited from the task or project"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Cached contact name"
+    },
+    "minutes": {
+      "type": "number",
+      "description": "Minutes of the attendance day assigned to this task or project"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes"
+    }
+  },
+  "required": [
+    "attendance_id",
+    "minutes"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_manage_time": true
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_manage_time": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_manage_time": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_manage_time": true
+          }
+        }
+      ]
+    }
+  }
+}

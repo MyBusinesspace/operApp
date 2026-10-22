@@ -1,0 +1,77 @@
+{
+  "name": "TaxRate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tax rate name (e.g. VAT, Tax Exempt)"
+    },
+    "rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax percentage value (e.g. 5 for 5%)"
+    }
+  },
+  "required": [
+    "name",
+    "rate"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

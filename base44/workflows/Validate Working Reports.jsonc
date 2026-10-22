@@ -1,0 +1,47 @@
+{
+  "name": "Validate Working Reports",
+  "description": "Hourly trigger \u2014 the function checks the configured validation hour from OperationsSettings and only runs the validation when the hour matches.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "validate_working_reports",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "validate": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "validateWorkingReports",
+            "args": {
+              "auto_quarantine": true
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Validate & quarantine reports",
+            "description": "Checks yesterday's reports, deletes violations (only at configured hour)"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "Asia/Dubai",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "name": "AccountMonthBalance",
+  "type": "object",
+  "properties": {
+    "account_key": {
+      "type": "string",
+      "description": "Lowercased account_code or account_id \u2014 the same key getAccountBalances uses"
+    },
+    "month": {
+      "type": "string",
+      "description": "YYYY-MM"
+    },
+    "debit": {
+      "type": "number",
+      "default": 0
+    },
+    "credit": {
+      "type": "number",
+      "default": 0
+    },
+    "entry_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of journal lines that contributed to this account in this month"
+    }
+  },
+  "required": [
+    "account_key",
+    "month"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

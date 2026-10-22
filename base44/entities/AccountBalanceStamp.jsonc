@@ -1,0 +1,87 @@
+{
+  "name": "AccountBalanceStamp",
+  "type": "object",
+  "properties": {
+    "latest_journal_id": {
+      "type": "string",
+      "description": "ID of the most recently updated posted journal at rebuild time"
+    },
+    "latest_journal_updated": {
+      "type": "string",
+      "description": "updated_date of the most recently updated posted journal at rebuild time"
+    },
+    "journal_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total posted journal count at rebuild time"
+    },
+    "rebuilt_at": {
+      "type": "string",
+      "description": "ISO timestamp of the rebuild"
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

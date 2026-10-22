@@ -1,0 +1,155 @@
+{
+  "name": "BankAccount",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Account name e.g. Main Current Account"
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "Bank institution name"
+    },
+    "account_number": {
+      "type": "string",
+      "description": "Bank account number (last 4 digits or masked)"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "Bank",
+        "Credit Card",
+        "Current",
+        "Savings",
+        "Loan",
+        "Petty Cash"
+      ],
+      "default": "Bank",
+      "description": "Account type \u2014 Bank or Credit Card"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED"
+    },
+    "chart_account_id": {
+      "type": "string",
+      "description": "Linked Chart of Account (enable_payments=true)"
+    },
+    "chart_account_code": {
+      "type": "string"
+    },
+    "chart_account_name": {
+      "type": "string"
+    },
+    "opening_balance": {
+      "type": "number",
+      "default": 0
+    },
+    "opening_balance_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived"
+      ],
+      "default": "Active"
+    },
+    "show_on_dashboard": {
+      "type": "boolean",
+      "default": true
+    },
+    "color": {
+      "type": "string",
+      "default": "#6366f1"
+    },
+    "display_order": {
+      "type": "number",
+      "description": "Card display order in the bank accounts grid (lower = first)"
+    },
+    "display_size": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "wide",
+        "large"
+      ],
+      "default": "normal",
+      "description": "Card size in the grid: normal = 1 column, wide = 2 columns, large = 2 columns \u00d7 2 rows"
+    },
+    "display_minimized": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the card is collapsed to just the header (no chart or metrics)"
+    }
+  },
+  "required": [
+    "name",
+    "currency"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

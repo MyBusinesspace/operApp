@@ -1,0 +1,45 @@
+{
+  "name": "Refresh Account Balances Cache",
+  "description": "Every 15 minutes \u2014 rebuilds the stored account balances only when the posted-journal stamp is stale; does nothing when the cache is current.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "refresh_account_balances_cache",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "refresh_balances": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "refreshAccountBalancesIfStale",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Refresh account balances cache",
+            "description": "Rebuilds only when the stamp is stale"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/15 * * * *",
+      "one_time_date": null,
+      "timezone": "Asia/Dubai",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

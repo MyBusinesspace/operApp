@@ -1,0 +1,87 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The recipient app User id. One row per recipient."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short headline shown in the bell."
+    },
+    "message": {
+      "type": "string",
+      "description": "Supporting text shown under the headline."
+    },
+    "type": {
+      "type": "string",
+      "default": "info",
+      "description": "Notification kind e.g. info, attendance_alert, attendance_closed."
+    },
+    "link": {
+      "type": "string",
+      "description": "In-app path the notification opens, e.g. /attendance."
+    },
+    "source_type": {
+      "type": "string",
+      "description": "Entity that produced this notification, e.g. AttendanceDay or TimeEntry."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Id of the source record."
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient has read it."
+    }
+  },
+  "required": [
+    "user_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

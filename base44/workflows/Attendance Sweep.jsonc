@@ -1,0 +1,45 @@
+{
+  "name": "Attendance Sweep",
+  "description": "Every 15 minutes: alerts on and auto-closes long-running attendance and field clock-in sessions.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/15 * * * *",
+      "one_time_date": null,
+      "timezone": "Asia/Dubai",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "attendance_sweep",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_sweep": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "attendanceSweep",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sweep long sessions",
+            "description": "Alerts and auto-closes long attendance and clock-in sessions"
+          }
+        }
+      }
+    ]
+  }
+}

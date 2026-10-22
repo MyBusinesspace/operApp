@@ -1,0 +1,11 @@
+{
+  "name": "@operapp/base44-compat",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./dist/utils/axios-client": "./utils/axios-client.js"
+  }
+}

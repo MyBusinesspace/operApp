@@ -1,0 +1,129 @@
+{
+  "name": "PriorPeriodSettlement",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "invoice",
+        "bill"
+      ],
+      "description": "Whether this settlement pays an invoice (AR) or a bill (AP)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Customer or supplier name from the original document"
+    },
+    "reference": {
+      "type": "string",
+      "description": "Invoice or bill number / reference from the original document"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the payment was received or made"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Payment amount in the document currency"
+    },
+    "currency": {
+      "type": "string",
+      "default": "AED",
+      "description": "Currency code of the payment amount"
+    },
+    "fx_amount": {
+      "type": "number",
+      "description": "Payment amount converted to the organization base currency"
+    },
+    "bank_account_id": {
+      "type": "string",
+      "description": "Reference to the BankAccount the payment was deposited into or paid from"
+    },
+    "bank_account_name": {
+      "type": "string",
+      "description": "Cached bank account name"
+    },
+    "bank_transaction_id": {
+      "type": "string",
+      "description": "Reference to the BankTransaction this settlement was matched to, if any"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional note about this settlement"
+    },
+    "import_key": {
+      "type": "string",
+      "description": "Stable deduplication key used during import to prevent duplicate settlements"
+    }
+  },
+  "required": [
+    "kind",
+    "payment_date",
+    "amount"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_read_finance": true
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

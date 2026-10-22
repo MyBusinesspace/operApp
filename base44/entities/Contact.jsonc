@@ -1,0 +1,204 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "reference": {
+      "type": "string",
+      "description": "Auto-generated contact reference code e.g. CMP-0001"
+    },
+    "code": {
+      "type": "string",
+      "description": "Company numbering code assigned to new contacts e.g. CUS-000001 (one series per contact type)"
+    },
+    "legacy_reference": {
+      "type": "string",
+      "description": "Reference carried over from a legacy / source system \u2014 informational only"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "Company Name",
+      "description": "Company name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number"
+    },
+    "company": {
+      "type": "string",
+      "title": "Company Nickname",
+      "description": "Short name or nickname (e.g. trade name, abbreviation)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Customer",
+        "Provider",
+        "Both",
+        "Contact"
+      ],
+      "default": "Contact",
+      "description": "Contact type based on business relationship"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Inactive",
+        "Archived"
+      ],
+      "default": "Active",
+      "description": "Contact status"
+    },
+    "group_id": {
+      "type": "string",
+      "description": "Reference to ContactGroup"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "city": {
+      "type": "string",
+      "description": "City"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country"
+    },
+    "tax_id": {
+      "type": "string",
+      "description": "Tax ID / VAT number"
+    },
+    "website": {
+      "type": "string",
+      "description": "Website URL"
+    },
+    "maps_link": {
+      "type": "string",
+      "description": "Google Maps URL for the company location"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "fiscal_legal_name": {
+      "type": "string",
+      "description": "Legal / fiscal company name"
+    },
+    "fiscal_address": {
+      "type": "string",
+      "description": "Fiscal/registered address"
+    },
+    "fiscal_city": {
+      "type": "string",
+      "description": "Fiscal city"
+    },
+    "fiscal_country": {
+      "type": "string",
+      "description": "Fiscal country"
+    },
+    "fiscal_zip": {
+      "type": "string",
+      "description": "Postal / ZIP code"
+    },
+    "fiscal_currency": {
+      "type": "string",
+      "description": "Default currency"
+    },
+    "fiscal_payment_terms": {
+      "type": "string",
+      "description": "Payment terms (e.g. Net 30)"
+    },
+    "fiscal_bank_name": {
+      "type": "string",
+      "description": "Bank name"
+    },
+    "fiscal_iban": {
+      "type": "string",
+      "description": "IBAN / Account number"
+    },
+    "fiscal_swift": {
+      "type": "string",
+      "description": "SWIFT / BIC code"
+    },
+    "source_account_number": {
+      "type": "string",
+      "title": "N\u00ba de cuenta en origen",
+      "description": "Account number as typed in the source system (e.g. Xero AccountNumber). Informational only, never the app serial."
+    },
+    "external_id": {
+      "type": "string",
+      "title": "ID externo",
+      "description": "Identifier of the contact in the source system (e.g. Xero ContactID). Used only to match on re-import."
+    }
+  },
+  "required": [
+    "full_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.can_write_finance": true
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Product/service code (required)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Product/service name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Product",
+        "Service"
+      ],
+      "default": "Service",
+      "description": "Item type"
+    },
+    "track_inventory": {
+      "type": "boolean",
+      "default": false,
+      "description": "Track inventory quantity"
+    },
+    "is_purchased": {
+      "type": "boolean",
+      "default": true,
+      "description": "Used in purchase transactions"
+    },
+    "cost_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Purchase / cost price"
+    },
+    "purchase_tax_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Purchase tax rate %"
+    },
+    "purchase_tax_name": {
+      "type": "string",
+      "description": "Original purchase tax label from Xero"
+    },
+    "purchase_description": {
+      "type": "string",
+      "description": "Description for purchase documents"
+    },
+    "purchase_account_code": {
+      "type": "string",
+      "description": "Default purchases account code from Xero"
+    },
+    "is_sold": {
+      "type": "boolean",
+      "default": true,
+      "description": "Used in sales transactions"
+    },
+    "sale_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Sale / selling price"
+    },
+    "sale_tax_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Sales tax rate %"
+    },
+    "sale_tax_name": {
+      "type": "string",
+      "description": "Original sales tax label from Xero"
+    },
+    "sale_description": {
+      "type": "string",
+      "description": "Description for sales documents (quotes, invoices)"
+    },
+    "sale_account_code": {
+      "type": "string",
+      "description": "Default sales account code from Xero"
+    },
+    "inventory_asset_account_code": {
+      "type": "string",
+      "description": "Inventory asset account code from Xero"
+    },
+    "cost_of_goods_sold_account_code": {
+      "type": "string",
+      "description": "Cost of goods sold account code from Xero"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Archived"
+      ],
+      "default": "Active"
+    },
+    "inventory_type": {
+      "type": "string",
+      "description": "Original Xero InventoryType; tracked inventory also sets track_inventory"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Stock quantity on hand"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure (e.g. pcs, hrs, kg)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    },
+    "annex_photos": {
+      "type": "array",
+      "description": "Annex files (photos/PDFs) attached to this product/service",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded file URI"
+          },
+          "caption": {
+            "type": "string",
+            "description": "File caption / description"
+          },
+          "include": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the file is included/visible"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    }
+  }
+}

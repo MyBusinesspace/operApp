@@ -1,0 +1,86 @@
+{
+  "name": "RolePermission",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "administrator",
+        "standard",
+        "sales_purchases",
+        "sales",
+        "draft_sales_purchases",
+        "purchases",
+        "payroll_admin",
+        "employee",
+        "viewer"
+      ],
+      "description": "Fixed role key (admin always has full access)"
+    },
+    "module": {
+      "type": "string",
+      "description": "Module key mirroring the app nav: business_overview, contacts, projects, assets, business_settings, operations_overview, work_orders, tasks, planner, timesheets, operations_settings, hr_overview, employees, leave, payroll, hr_settings, sales_overview, quotes, invoices, products, customers, sales_settings, purchasing_overview, purchase_orders, bills, petty_cash, suppliers, purchasing_settings, accounting_overview, bank_accounts, bank_rules, fixed_assets, chart_of_accounts, manual_journals, accounting_settings, reports, sales_tax_report, import_center, settings, organization_settings, file_types, mobile_app, data_export, historical_payments, asset_settings, service_settings"
+    },
+    "can_view": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_create": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_edit": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_delete": {
+      "type": "boolean",
+      "default": false
+    },
+    "can_approve": {
+      "type": "boolean",
+      "default": false,
+      "description": "Approve timesheets, amendments, etc."
+    },
+    "can_create_on_behalf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Create records (leave, petty cash) on behalf of another employee"
+    }
+  },
+  "required": [
+    "role",
+    "module"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
