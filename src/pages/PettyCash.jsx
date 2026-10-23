@@ -52,9 +52,16 @@ export default function PettyCash() {
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
-    base44.entities.RolePermission.list("-created_date", 200).then(list => setRolePerms(list)).catch(() => setRolePerms([]));
-    base44.entities.EmployeeRole.list("name", 100).then(list => setEmployeeRoles(list)).catch(() => setEmployeeRoles([]));
-  }, []);
+    // Admin access below does not depend on role mappings. Do not spend two
+    // entity reads on every admin visit, or fetch before identity is known.
+    setRolePerms([]);
+    setEmployeeRoles([]);
+    if (!user?.id || user.role === "admin") return;
+    let cancelled = false;
+    base44.entities.RolePermission.list("-created_date", 200).then(list => { if (!cancelled) setRolePerms(list); }).catch(() => { if (!cancelled) setRolePerms([]); });
+    base44.entities.EmployeeRole.list("name", 100).then(list => { if (!cancelled) setEmployeeRoles(list); }).catch(() => { if (!cancelled) setEmployeeRoles([]); });
+    return () => { cancelled = true; };
+  }, [user?.id, user?.role]);
 
   const mappedRole = employeeRoles.find(r => r.name === currentEmployee?.role)?.key || "";
 
@@ -70,7 +77,7 @@ export default function PettyCash() {
     ]);
     setEmployees(emps);
     setEntries(ents);
-    if (errors.length) setLoadError("Could not load all petty cash data (" + errors.join("; ") + "). Totals below may be incomplete.");
+    if (errors.length) setLoadError("Could not load all petty cash data (" + errors.join("; ") + "). Balances and employee wallets are unavailable until the data can be loaded.");
     setLoading(false);
   };
 
@@ -115,7 +122,7 @@ export default function PettyCash() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Petty Cash</h1>
-              <p className="text-xs text-muted-foreground">Track employee expenses and cash allocations</p>
+              <p className="text-xs text-muted-foreground">App-recorded employee entries. Xero source history is separate.</p>
             </div>
           </div>
         </div>
@@ -124,16 +131,16 @@ export default function PettyCash() {
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="rounded-xl bg-muted/40 border border-border px-4 py-3">
             <p className="text-xs text-muted-foreground mb-1">Total Expenses</p>
-            <p className="text-lg font-bold text-red-600 tabular-nums">{fmtAmount(totalExpenses, currency)}</p>
+            <p className="text-lg font-bold text-red-600 tabular-nums">{loading ? "Loading..." : loadError ? "Unavailable" : fmtAmount(totalExpenses, currency)}</p>
           </div>
           <div className="rounded-xl bg-muted/40 border border-border px-4 py-3">
             <p className="text-xs text-muted-foreground mb-1">Total Income / Allocations</p>
-            <p className="text-lg font-bold text-emerald-600 tabular-nums">{fmtAmount(totalIncome, currency)}</p>
+            <p className="text-lg font-bold text-emerald-600 tabular-nums">{loading ? "Loading..." : loadError ? "Unavailable" : fmtAmount(totalIncome, currency)}</p>
           </div>
           <div className="rounded-xl bg-muted/40 border border-border px-4 py-3">
             <p className="text-xs text-muted-foreground mb-1">Net Balance</p>
             <p className={`text-lg font-bold tabular-nums ${netBalance >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-              {netBalance < 0 ? "- " : ""}{fmtAmount(Math.abs(netBalance), currency)}
+              {loading ? "Loading..." : loadError ? "Unavailable" : `${netBalance < 0 ? "- " : ""}${fmtAmount(Math.abs(netBalance), currency)}`}
             </p>
           </div>
         </div>
@@ -188,6 +195,8 @@ export default function PettyCash() {
           <div className="flex items-center justify-center h-48">
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
+        ) : loadError ? (
+          <p className="text-xs text-muted-foreground">Employee wallets could not be loaded. No balances or empty-list conclusions are available.</p>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 text-muted-foreground">
             <Users className="w-12 h-12 opacity-20" />

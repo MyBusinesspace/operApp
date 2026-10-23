@@ -25,6 +25,7 @@ function fmtAmount(n, currency = "AED") {
 export default function EmployeeWalletModal({ open, onClose, employee, onBehalfEmployees = [], canCreateOnBehalf = false, canCreate = true, canEdit = true, canDelete = true }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [entryModal, setEntryModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [defaultType, setDefaultType] = useState("expense");
@@ -36,9 +37,13 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
   const load = async () => {
     if (!employee?.id) return;
     setLoading(true);
-    const list = await base44.entities.PettyCashEntry.filter({ employee_id: employee.id }, "-date").catch(() => []);
-    setEntries(list);
-    setLoading(false);
+    setLoadError("");
+    try {
+      const list = await base44.entities.PettyCashEntry.filter({ employee_id: employee.id }, "-date", 5000);
+      setEntries(list);
+    } catch (e) {
+      setLoadError("Entries could not be refreshed. If you just saved an entry, do not add it again. " + (e?.message || ""));
+    } finally { setLoading(false); }
   };
 
   useEffect(() => {
@@ -48,6 +53,7 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
     }
     if (!open) {
       setEntries([]);
+      setLoadError("");
       setReceiptViewer(null);
     }
   }, [open, employee]);
@@ -72,14 +78,16 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
 
   const handleSave = async (form) => {
     if (editingEntry?.id) {
-      await base44.entities.PettyCashEntry.update(editingEntry.id, form);
+      const saved = await base44.entities.PettyCashEntry.update(editingEntry.id, form);
+      setEntries(prev => prev.map(e => e.id === editingEntry.id ? saved : e));
     } else {
-      await base44.entities.PettyCashEntry.create(form);
+      const saved = await base44.entities.PettyCashEntry.create(form);
+      setEntries(prev => [saved, ...prev.filter(e => e.id !== saved.id)]);
     }
     didChangeRef.current = true;
     setEntryModal(false);
     setEditingEntry(null);
-    load();
+    await load();
   };
 
   const handleDelete = async (id) => {
@@ -107,6 +115,7 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
     <>
       <Dialog open={open} onOpenChange={() => onClose(didChangeRef.current)}>
         <DialogContent className="w-[95vw] max-w-5xl max-h-[92vh] flex flex-col p-0 gap-0" hideClose>
+        {loadError && <div role="alert" className="m-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{loadError}</div>}
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 bg-slate-100">
             <div className="flex items-center gap-4">
@@ -126,7 +135,7 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Total Balance</p>
                 <p className={`text-xl font-bold tabular-nums ${balance >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                  {currency} {new Intl.NumberFormat("en-US", { minimumFractionDigits: 2 }).format(Math.abs(balance))}
+                  {loading ? "Loading..." : loadError ? "Unavailable" : `${balance < 0 ? "−" : ""}${currency} ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2 }).format(Math.abs(balance))}`}
                 </p>
               </div>
             </div>
@@ -137,12 +146,12 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-red-500" />
               <span className="text-muted-foreground">Expenses:</span>
-              <span className="font-semibold text-red-600">{fmtAmount(totalExpenses, currency)}</span>
+              <span className="font-semibold text-red-600">{loading ? "Loading..." : loadError ? "Unavailable" : fmtAmount(totalExpenses, currency)}</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               <span className="text-muted-foreground">Received:</span>
-              <span className="font-semibold text-emerald-600">{fmtAmount(totalIncome, currency)}</span>
+              <span className="font-semibold text-emerald-600">{loading ? "Loading..." : loadError ? "Unavailable" : fmtAmount(totalIncome, currency)}</span>
             </div>
             <div className="ml-auto flex gap-2">
               {canCreate && (
@@ -175,7 +184,7 @@ export default function EmployeeWalletModal({ open, onClose, employee, onBehalfE
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
-            ) : entries.length === 0 ? (
+            ) : entries.length === 0 && !loadError ? (
               <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
                 <FileText className="w-10 h-10 opacity-20" />
                 <p className="text-sm">No entries yet. Add an expense or income to get started.</p>

@@ -25,6 +25,8 @@ const EMPTY_INCOME = {
 export default function PettyCashEntryModal({ open, onClose, onSave, entry, employee, defaultType = "expense", onBehalfEmployees = [], canCreateOnBehalf = false }) {
   const [form, setForm] = useState(EMPTY_EXPENSE);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saveUncertain, setSaveUncertain] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
@@ -32,6 +34,11 @@ export default function PettyCashEntryModal({ open, onClose, onSave, entry, empl
 
   useEffect(() => {
     if (!open) return;
+    setSaving(false);
+    setSaveUncertain(false);
+    setUploadingReceipt(false);
+    setExtracting(false);
+    setError("");
     setSelectedEmployeeId("");
     if (entry) {
       setForm({ ...EMPTY_EXPENSE, ...entry, amount: entry.amount ?? "" });
@@ -46,16 +53,23 @@ export default function PettyCashEntryModal({ open, onClose, onSave, entry, empl
   const handleReceiptUpload = async (file) => {
     if (!file) return;
     setUploadingReceipt(true);
+    setError("");
+    try {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     set("receipt_url", file_url);
-    setUploadingReceipt(false);
     return file_url;
+    } catch (e) {
+      setError(e?.message || "Receipt upload failed. Your form has been kept.");
+      return null;
+    } finally { setUploadingReceipt(false); }
   };
 
   const handleAIExtract = async (fileOrUrl) => {
     const url = typeof fileOrUrl === "string" ? fileOrUrl : form.receipt_url;
     if (!url) return;
     setExtracting(true);
+    setError("");
+    try {
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `You are an expense receipt parser. Analyze this receipt image and extract the following information. Be precise with numbers.
       
@@ -94,7 +108,9 @@ Return ONLY the JSON, no other text.`,
       category: result.category || f.category,
       ai_extracted: true
     }));
-    setExtracting(false);
+    } catch (e) {
+      setError(e?.message || "Receipt extraction failed. You can enter the details manually.");
+    } finally { setExtracting(false); }
   };
 
   const handleFileChange = async (e) => {
@@ -106,24 +122,30 @@ Return ONLY the JSON, no other text.`,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving || saveUncertain) return;
     const targetEmployee = (canCreateOnBehalf && selectedEmployeeId)
       ? onBehalfEmployees.find(emp => emp.id === selectedEmployeeId)
       : employee;
     setSaving(true);
+    setError("");
+    try {
     await onSave({
       ...form,
-      employee_id: targetEmployee.id,
-      employee_name: targetEmployee.full_name,
-      user_id: targetEmployee.user_id || "",
+      employee_id: entry ? entry.employee_id : targetEmployee.id,
+      employee_name: entry ? entry.employee_name : targetEmployee.full_name,
+      user_id: entry ? entry.user_id : (targetEmployee.user_id || ""),
       amount: parseFloat(form.amount) || 0
     });
-    setSaving(false);
+    } catch (e) {
+      setSaveUncertain(true);
+      setError("Save could not be confirmed. Your form has been kept. Check existing entries before retrying. " + (e?.message || ""));
+    } finally { setSaving(false); }
   };
 
   const isExpense = form.type === "expense";
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={() => { if (!saving && !uploadingReceipt && !extracting) onClose(); }}>
       <DialogContent hideClose className="max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -137,6 +159,7 @@ Return ONLY the JSON, no other text.`,
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-1">
+          {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
           {/* Type selector (only for new entries) */}
           {!entry && (
             <div className="flex gap-2">
@@ -284,8 +307,8 @@ Return ONLY the JSON, no other text.`,
           </div>
 
           <div className="flex justify-end gap-2 pt-1">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving || !form.date || !form.amount}
+            <Button type="button" variant="outline" disabled={saving || uploadingReceipt || extracting} onClick={onClose}>Cancel</Button>
+            <Button type="submit" disabled={saving || saveUncertain || uploadingReceipt || extracting || !form.date || !form.amount}
               className={isExpense ? "bg-red-600 hover:bg-red-700 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"}>
               {saving ? "Saving..." : entry ? "Save Changes" : isExpense ? "Add Expense" : "Add Income"}
             </Button>
